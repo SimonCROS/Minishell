@@ -2,37 +2,40 @@
 
 #include <stdio.h>
 
-int	testFirst(char *element, char *character)
+void	cmd_distributor(char **argv)
 {
-	return (*element == *character);
+	if (*argv == NULL)
+		return ;
+	else if (!ft_strcmp(*argv, "pwd"))
+		pwd(argv + 1);
+	else if (!ft_strcmp(*argv, "cd"))
+		cd(argv + 1);
+	else
+		execute(*argv, argv);
 }
 
-void	test(void)
+void	test_adel(void)
 {
 	int			result;
 	char		*buffer;
-	t_list		*list;
-	char		comp;
+	char		**argv;
 
 	result = 1;
-	list = lst_new(free);
 	while (result)
 	{
 		result = get_next_line(0, &buffer);
-		lst_push(list, buffer);
+		argv = ft_split(buffer, ' ');
+		free(buffer);
+		cmd_distributor(argv);
+		lst_destroy(as_listf((void**)argv, free));
 	}
-	printf("\n--------------------\n");
-	printf("Taille avant filter %d\n", list->size);
-	lst_filter_in(list, (t_pre)str_not_empty);
-	printf("Taille après filter %d\n", list->size);
-	comp = 't';
-	printf("Premier element qui commence par %c : \"%s\"\n", comp,
-		lst_find_first(list, (t_bipre)testFirst, &comp));
-	lst_destroy(list);
 }
 
-int	main(void)
+int	main(int argc, char *argv[], char *envp[])
 {
-	test();
+	(void)argc;
+	(void)argv;
+	global.envp = envp;
+	test_adel();
 	return (0);
 }

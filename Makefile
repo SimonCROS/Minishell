@@ -8,6 +8,8 @@ LIBFT		= $(LIBFT_DIR)/libft.a
 SRCS		=	main.c								\
 				gnl/get_next_line.c					\
 				gnl/get_next_line_utils.c			\
+				exec_command.c						\
+				pwd.c
 
 OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))
 
@@ -16,7 +18,7 @@ NAME		= minishell
 CC			= gcc
 RM			= rm -f
 
-CFLAGS		= -Wall -Wextra# -Werror
+CFLAGS		= -g -Wall -Wextra # -Werror
 INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 
 HEADERS		= includes/minishell.h
