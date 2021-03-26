@@ -1,15 +1,16 @@
 #include "minishell.h"
 
-#include <stdio.h>
 
 void	cmd_distributor(char **argv)
 {
 	if (*argv == NULL)
 		return ;
-	else if (!ft_strcmp(*argv, "pwd"))
-		pwd(argv + 1);
+	else if (!ft_strcmp(*argv, "echo"))
+		echo(argv + 1);
 	else if (!ft_strcmp(*argv, "cd"))
 		cd(argv + 1);
+	else if (!ft_strcmp(*argv, "pwd"))
+		pwd(argv + 1);
 	else
 		execute(*argv, argv);
 }

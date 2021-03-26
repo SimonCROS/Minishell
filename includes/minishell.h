@@ -44,5 +44,6 @@ int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 void		execute(char *path, char **argv);
 void		pwd(char **argv);
 void		cd(char **argv);
+void		echo(char **argv);
 
 #endif
