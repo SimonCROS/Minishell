@@ -34,7 +34,8 @@ char	*parse_double_quote(char **line)
 		if (**line == '\\' && (*(*line + 1) == '$' || *(*line + 1) == '`'
 				|| *(*line + 1) == '\\' || *(*line + 1) == '\"'))
 			(*line)++;
-		else if (**line == '$' || **line == '`' || **line == '\\')
+		else if ((**line == '$' && (ft_isalnum(*(*line + 1))
+					|| *(*line + 1) == '_')) || **line == '`')
 			printf("Special here !\n");
 		(*line)++;
 	}
@@ -57,7 +58,8 @@ char	*parse_no_quote(char **line)
 				|| *(*line + 1) == '\\' || *(*line + 1) == '\"'
 				|| *(*line + 1) == ' '))
 			(*line)++;
-		else if (**line == '$' || **line == '`' || **line == '\\')
+		else if ((**line == '$' && (ft_isalnum(*(*line + 1))
+					|| *(*line + 1) == '_')) || **line == '`')
 			printf("Special here !\n");
 		(*line)++;
 	}
