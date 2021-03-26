@@ -21,6 +21,52 @@ char	*parse_simple_quote(char **line)
 	return (str);
 }
 
+char	*parse_double_quote(char **line)
+{
+	char	*str;
+	char	*start;
+
+	(*line)++;
+	start = *line;
+	str = NULL;
+	while (**line && **line != '\"')
+	{
+		if (**line == '\\' && (*(*line + 1) == '$' || *(*line + 1) == '`'
+				|| *(*line + 1) == '\\' || *(*line + 1) == '\"'))
+			(*line)++;
+		else if (**line == '$' || **line == '`' || **line == '\\')
+			printf("Special here !\n");
+		(*line)++;
+	}
+	if (**line)
+		str = ft_substr(start, 0, *line - start);
+	return (str);
+}
+
+char	*parse_no_quote(char **line)
+{
+	char	*str;
+	char	*start;
+
+	start = *line;
+	str = NULL;
+	while (**line && **line != '\"' && **line != '\''
+		&& **line != ' ')
+	{
+		if (**line == '\\' && (*(*line + 1) == '$' || *(*line + 1) == '`'
+				|| *(*line + 1) == '\\' || *(*line + 1) == '\"'
+				|| *(*line + 1) == ' '))
+			(*line)++;
+		else if (**line == '$' || **line == '`' || **line == '\\')
+			printf("Special here !\n");
+		(*line)++;
+	}
+	str = ft_substr(start, 0, *line - start);
+	if (**line)
+		(*line)--;
+	return (str);
+}
+
 char	*parse_argument(char **line)
 {
 	t_list	*argument;
@@ -28,13 +74,19 @@ char	*parse_argument(char **line)
 	argument = lst_new(free);
 	if (!argument)
 		return (NULL);
-	while (**line)
+	while (**line && **line != ' ')
 	{
 		if (**line == '\'')
 			lst_push(argument, parse_simple_quote(line));
+		else if (**line == '\"')
+			lst_push(argument, parse_double_quote(line));
+		else
+			lst_push(argument, parse_no_quote(line));
 		(*line)++;
 	}
-	return ((char *)lst_reducef(argument, NULL, ft_strjoin, free));
+	while (**line == ' ')
+		(*line)++;
+	return ((char *)lst_reducef(argument, NULL, (t_bifun)ft_strjoin, free));
 }
 
 int	parse_command(t_list *commands, char **line)
