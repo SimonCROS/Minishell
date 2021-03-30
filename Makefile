@@ -9,7 +9,8 @@ SRCS		=	main.c								\
 				gnl/get_next_line.c					\
 				gnl/get_next_line_utils.c			\
 				exec_command.c						\
-				pwd.c
+				commands.c								\
+				environ.c
 
 OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))
 

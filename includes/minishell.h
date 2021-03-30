@@ -30,7 +30,7 @@ struct s_gnl_entry
 struct s_global
 {
 	char	pwd[MAXPATHLEN];
-	char	**envp;
+	t_map	*env;
 };
 
 /*** Global variables *********************************************************/
@@ -41,9 +41,13 @@ char		**ft_split_first(char *s, char c);
 int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 
-void		execute(char *path, char **argv);
-void		pwd(char **argv);
-void		cd(char **argv);
-void		echo(char **argv);
+void		do_execute(char *path, char **argv);
+void		do_pwd(char **argv);
+void		do_cd(char **argv);
+void		do_echo(char **argv);
+void		do_export(char **argv);
+void		do_env(char **argv);
+void		do_exit(char **argv);
+void		load_environment(char **envp);
 
 #endif

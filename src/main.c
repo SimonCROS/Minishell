@@ -6,13 +6,19 @@ void	cmd_distributor(char **argv)
 	if (*argv == NULL)
 		return ;
 	else if (!ft_strcmp(*argv, "echo"))
-		echo(argv + 1);
+		do_echo(argv + 1);
 	else if (!ft_strcmp(*argv, "cd"))
-		cd(argv + 1);
+		do_cd(argv + 1);
 	else if (!ft_strcmp(*argv, "pwd"))
-		pwd(argv + 1);
+		do_pwd(argv + 1);
+	else if (!ft_strcmp(*argv, "export"))
+		do_export(argv + 1);
+	else if (!ft_strcmp(*argv, "env"))
+		do_env(argv + 1);
+	else if (!ft_strcmp(*argv, "exit"))
+		do_exit(argv + 1);
 	else
-		execute(*argv, argv);
+		do_execute(*argv, argv);
 }
 
 void	test_adel(void)
@@ -36,7 +42,7 @@ int	main(int argc, char *argv[], char *envp[])
 {
 	(void)argc;
 	(void)argv;
-	global.envp = envp;
+	load_environment(envp);
 	test_adel();
 	return (0);
 }
