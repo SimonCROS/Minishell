@@ -13,6 +13,8 @@ void	cmd_distributor(char **argv)
 		do_pwd(argv + 1);
 	else if (!ft_strcmp(*argv, "export"))
 		do_export(argv + 1);
+	else if (!ft_strcmp(*argv, "unset"))
+		do_unset(argv + 1);
 	else if (!ft_strcmp(*argv, "env"))
 		do_env(argv + 1);
 	else if (!ft_strcmp(*argv, "exit"))

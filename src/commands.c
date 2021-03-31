@@ -77,12 +77,13 @@ void	do_export(char **argv)
 	t_map			*sort;
 	t_citerator		iter;
 	t_mapentry		*elem;
+	t_list			*res;
 	int				i;
 
 	i = -1;
 	if (!*argv)
 	{
-		sort = map_sort(global.env, (t_com)ft_strcmp, (t_fun)ft_strdup);
+		sort = map_sort(global.env, (t_com)ft_strcmp);
 		iter = citerator_new((const t_clist *)sort);
 		while (citerator_has_next(&iter))
 		{
@@ -92,15 +93,24 @@ void	do_export(char **argv)
 			else
 				printf("declare -x %s\n", elem->key);
 		}
-		map_destroy(sort);
+		map_free(sort);
 	}
 	while (argv[++i])
 	{
-		if (!check_export_arg(argv[i]))
-			printf("export: '%s': not a valid identifier\n", argv[i]);
-		else
+		res = as_listf((void **)ft_split(argv[i], '='), free);
+		if (res != NULL)
 		{
-			
+			if (!check_export_arg(res->first->value))
+				printf("export: '%s': not a valid identifier\n", argv[i]);
+			else if (res->size == 1 && map_contains_key(global.env, res->first->value))
+				map_replace(global.env, lst_shift(res), NULL);
+			else if (res->size == 1)
+				map_put(global.env, lst_shift(res), NULL);
+			else if (res->size >= 2 && map_contains_key(global.env, res->first->value))
+				map_replace(global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
+			else if (res->size >= 2)
+				map_put(global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
+			lst_destroy(res);
 		}
 	}
 }
@@ -139,7 +149,10 @@ void	do_unset(char **argv)
 	i = -1;
 	while (argv[++i])
 	{
-		;// do smth
+		if (!check_export_arg(argv[i]))
+			printf("export: '%s': not a valid identifier\n", argv[i]);
+		else
+			map_delete(global.env, argv[i]);
 	}
 }
 

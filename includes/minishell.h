@@ -46,8 +46,10 @@ void		do_pwd(char **argv);
 void		do_cd(char **argv);
 void		do_echo(char **argv);
 void		do_export(char **argv);
+void		do_unset(char **argv);
 void		do_env(char **argv);
 void		do_exit(char **argv);
+char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
 
 #endif
