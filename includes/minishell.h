@@ -11,8 +11,38 @@
 
 typedef struct s_gnl_entry	t_gnl_entry;
 
-typedef enum e_command_type	t_command_type;
+typedef struct s_token		t_token;
+typedef enum e_token_type	t_token_type;
+
 typedef struct s_command	t_command;
+typedef enum e_command_type	t_command_type;
+
+/*** Tokenizer ****************************************************************/
+
+enum e_token_type
+{
+	WHITESPACE,
+	WORD,
+	ESCAPE,
+	LAZY_AND,
+	AND,
+	SINGLE_QUOTE,
+	DOUBLE_QUOTE,
+	PIPE,
+	REDIRECT_IN,
+	REDIRECT_OUT,
+	DOUBLE_REDIRECT_OUT,
+	EOI
+};
+
+struct s_token
+{
+	t_list			args;
+	char			*redirect_in;
+	char			*redirect_out;
+	t_command		parent;
+	t_token_type	token_type;
+};
 
 /*** GNL **********************************************************************/
 

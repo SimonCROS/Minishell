@@ -1,18 +1,5 @@
 #include "minishell.h"
 
-#include <stdio.h>
-char	*remove(char *str, char *to_rm)
-{
-	int	to_rm_cnt;
-
-	to_rm_cnt = 0;
-	while (to_rm)
-	{
-		to_rm_cnt += ft_strcnt(str, *to_rm);
-		to_rm++;
-	}
-}
-
 void	printline(void *str)
 {
 	printf("\033[32m\"%s\"\033[0m\n", (char *)str);
