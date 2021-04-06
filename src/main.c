@@ -1,9 +1,9 @@
 #include "minishell.h"
 #include <stdio.h>
 
-void	printline(t_token *str)
+void	printline(t_token *token)
 {
-	printf("\033[32m\"%s\"\033[0m\n", str->content->string);
+	printf("\033[33m%d \033[31m\"\033[32m%s\033[31m\"\033[0m\n", token->token_type, token->content->string);
 }
 
 // char	*parse_simple_quote(char **line)
@@ -147,7 +147,10 @@ void	parse_line(char *line)
 {
 	t_list	*tokens;
 	t_token	*current;
+	t_token empty;
 
+	empty.content = NULL;
+	empty.token_type = T_EOI;
 	tokens = lst_new((t_con)free_token);
 	current = new_token(tokens, T_WORD);
 	while (*line)
@@ -155,10 +158,17 @@ void	parse_line(char *line)
 		if (*line == '\"' && current->token_type != T_DOUBLE_QUOTE)
 			current = new_token(tokens, T_DOUBLE_QUOTE);
 		else if (*line == '\"' && current->token_type == T_DOUBLE_QUOTE)
-			current = new_token(tokens, T_WORD);
-		else if (*line == ' ' && current->token_type != T_DOUBLE_QUOTE
-			&& current->token_type != T_WHITESPACE)
-			current = new_token(tokens, T_WHITESPACE);
+		{
+			str_cappend(current->content, *line);
+			line++;
+			current = &empty;
+			continue ;
+		}
+		else if (*line == ' ' && current->token_type != T_DOUBLE_QUOTE)
+		{
+			if (current->token_type != T_WHITESPACE)
+				current = new_token(tokens, T_WHITESPACE);
+		}
 		else if (current->token_type != T_WORD && current->token_type != T_DOUBLE_QUOTE)
 			current = new_token(tokens, T_WORD);
 		str_cappend(current->content, *line);
