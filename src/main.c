@@ -154,14 +154,14 @@ void	parse_line(char *line)
 	{
 		if (*line == '\"' && current->token_type != T_DOUBLE_QUOTE)
 			current = new_token(tokens, T_DOUBLE_QUOTE);
+		else if (*line == '\"' && current->token_type == T_DOUBLE_QUOTE)
+			current = new_token(tokens, T_WORD);
 		else if (*line == ' ' && current->token_type != T_DOUBLE_QUOTE
 			&& current->token_type != T_WHITESPACE)
 			current = new_token(tokens, T_WHITESPACE);
-		else if (current->token_type != T_WORD)
+		else if (current->token_type != T_WORD && current->token_type != T_DOUBLE_QUOTE)
 			current = new_token(tokens, T_WORD);
 		str_cappend(current->content, *line);
-		if (*line == '\"' && current->token_type == T_DOUBLE_QUOTE)
-			current = new_token(tokens, T_WORD);
 		line++;
 	}
 	lst_foreach(tokens, (t_con)printline);
