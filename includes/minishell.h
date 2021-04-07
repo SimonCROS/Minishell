@@ -31,14 +31,14 @@ enum e_token_type
 	T_PIPE,
 	T_REDIRECT_IN,
 	T_REDIRECT_OUT,
-	T_DOUBLE_REDIRECT_OUT,
 	T_EOI
 };
 
 struct s_token
 {
-	t_string		*content;
+	t_string		*buffer;
 	t_token_type	token_type;
+	int				quoted;
 };
 
 /*** GNL **********************************************************************/
