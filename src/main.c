@@ -3,8 +3,42 @@
 
 void	printline(t_token *token)
 {
-	printf("\033[33m%d \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
-		token->token_type, token->buffer->string);
+	char	*token_name;
+
+	switch (token->token_type)
+	{
+		case T_WORD:
+			token_name = "word";
+			break;
+		case T_WHITESPACE:
+			token_name = "space";
+			break;
+		case T_LAZY_AND:
+			token_name = "lazy and";
+			break;
+		case T_AND:
+			token_name = "and";
+			break;
+		case T_SINGLE_QUOTE:
+			token_name = "sin quotes";
+			break;
+		case T_DOUBLE_QUOTE:
+			token_name = "quotes";
+			break;
+		case T_PIPE:
+			token_name = "pipe";
+			break;
+		case T_REDIRECT_IN:
+			token_name = "in";
+			break;
+		case T_REDIRECT_OUT:
+			token_name = "out";
+			break;
+		default:
+			token_name = "eoi";
+	}
+	printf("\033[33m%10s \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
+		token_name, token->buffer->string);
 }
 
 void	free_token(t_token *token)
@@ -32,8 +66,9 @@ t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 // To protect
 void	parse_line(char *line)
 {
-	t_list	*tokens;
 	t_token	*current;
+	t_list	*tokens;
+	int		escaped;
 	t_token	empty;
 
 	empty.buffer = NULL;
@@ -41,9 +76,10 @@ void	parse_line(char *line)
 	empty.quoted = FALSE;
 	tokens = lst_new((t_con)free_token);
 	current = &empty;
+	escaped = 0;
 	while (*line)
 	{
-		if (!current->quoted)
+		if (!current->quoted && !escaped)
 		{
 			if (*line == '|')
 				current = new_token(tokens, T_PIPE, current);
@@ -57,20 +93,23 @@ void	parse_line(char *line)
 				current = new_token(tokens, T_REDIRECT_IN, current);
 			else if (*line == '>')
 				current = new_token(tokens, T_REDIRECT_OUT, current);
+			else if (*line == ';')
+				current = new_token(tokens, T_LAZY_AND, current);
+			else if (*line == '&')
+				current = new_token(tokens, T_AND, current);
 			else
 				current = new_token(tokens, T_WORD, current);
+			if (*line == '\\')
+				escaped = 2;
 		}
-		else
+		else if (*line == *current->buffer->string && !escaped)
 		{
-			if (*line == *current->buffer->string)
-			{
-				str_cappend(current->buffer, *(line++));
-				current = &empty;
-				continue ;
-			}
+			str_cappend(current->buffer, *(line++));
+			current = &empty;
+			continue ;
 		}
-		str_cappend(current->buffer, *line);
-		line++;
+		str_cappend(current->buffer, *(line++));
+		escaped /= 2;
 	}
 	lst_foreach(tokens, (t_con)printline);
 }

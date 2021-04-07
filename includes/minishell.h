@@ -21,9 +21,8 @@ typedef enum e_command_type	t_command_type;
 
 enum e_token_type
 {
-	T_WHITESPACE,
 	T_WORD,
-	T_ESCAPE,
+	T_WHITESPACE,
 	T_LAZY_AND,
 	T_AND,
 	T_SINGLE_QUOTE,
