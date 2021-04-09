@@ -83,7 +83,7 @@ void	do_execute(char *path, char **argv)
 		wait(NULL);
 		if (pid == 0)
 			if (execve(path, argv, array) == ERROR)
-				printf("%s\n", strerror(errno));
+				ft_putendl_fd(strerror(errno), 2);
 		return ;
 	}
 	env_path = get_env_path(path);
@@ -101,11 +101,11 @@ void	do_execute(char *path, char **argv)
 		if (pid == 0)
 		{
 			if (execve(path, argv, array) == ERROR)
-				printf("%s\n", strerror(errno));
+				ft_putendl_fd(strerror(errno), 2);
 		}
 	}
 	else
-		printf("sh: command not found: %s\n", path);
+		ft_puterr2("sh: command not found: ", path);
 	i = -1;
 	while (array[++i])
 		free(array[i]);

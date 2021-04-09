@@ -1,5 +1,18 @@
 #include "minishell.h"
 
+void	ft_puterr2(char *a, char *b)
+{
+	ft_putstr_fd(a, 2);
+	ft_putendl_fd(b, 2);
+}
+
+void	ft_puterr3(char *a, char *b, char *c)
+{
+	ft_putstr_fd(a, 2);
+	ft_putstr_fd(b, 2);
+	ft_putendl_fd(c, 2);
+}
+
 void	do_echo(char **argv)
 {
 	int		endl;
@@ -36,11 +49,11 @@ void	do_cd(char **argv)
 		ret = chdir(path);
 	}
 	else if (argv[1] != NULL)
-		printf("cd: too many arguments\n");
+		ft_putendl_fd("cd: too many arguments", 2);
 	else
 		ret = chdir(argv[0]);
 	if (ret == ERROR)
-		printf("%s\n", strerror(errno));
+		ft_putendl_fd(strerror(errno), 2);
 }
 
 void	do_pwd(char **argv)
@@ -49,25 +62,26 @@ void	do_pwd(char **argv)
 
 	if (argv[0] != NULL)
 	{
-		printf("pwd: too many arguments\n");
+		ft_putendl_fd("pwd: too many arguments", 2);
 		return ;
 	}
 	path = getcwd(global.pwd, MAXPATHLEN);
+	ft_strlen(path);
 	if (path == NULL)
-		printf("%s\n", strerror(errno));
+		ft_putendl_fd(strerror(errno), 2);
 	else
-		printf("%s\n", path);
+		ft_putendl(path);
 }
 
 int		check_export_arg(char *arg)
 {
 	int		i;
 
-	i = 0;
-	if (!ft_isalpha(arg[i]))
+	i = -1;
+	if (!ft_isalpha(arg[0]) && arg[0] != '_')
 		return (FALSE);
-	while (arg[i])
-		if (!ft_isalnum(arg[i++]))
+	while (arg[++i])
+		if (!ft_isalnum(arg[i]) && arg[i] != '_')
 			return (FALSE);
 	return (TRUE);
 }
@@ -101,7 +115,11 @@ void	do_export(char **argv)
 		if (res != NULL)
 		{
 			if (!check_export_arg(res->first->value))
-				printf("export: '%s': not a valid identifier\n", argv[i]);
+				ft_puterr3("export: '", res->first->value, "': not a valid identifier");
+			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=' && map_contains_key(global.env, res->first->value))
+				map_replace(global.env, lst_shift(res), ft_strdup(""));
+			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=')
+				map_put(global.env, lst_shift(res), ft_strdup(""));
 			else if (res->size == 1 && map_contains_key(global.env, res->first->value))
 				map_replace(global.env, lst_shift(res), NULL);
 			else if (res->size == 1)
@@ -121,7 +139,7 @@ void	do_env(char **argv)
 	t_mapentry		*elem;
 
 	if (*argv != NULL)
-		printf("env: too many arguments\n");
+		ft_putendl_fd("env: too many arguments", 2);
 	iter = citerator_new((const t_clist *)global.env);
 	while (citerator_has_next(&iter))
 	{
@@ -150,7 +168,7 @@ void	do_unset(char **argv)
 	while (argv[++i])
 	{
 		if (!check_export_arg(argv[i]))
-			printf("export: '%s': not a valid identifier\n", argv[i]);
+			ft_puterr3("export: '", argv[i], "': not a valid identifier");
 		else
 			map_delete(global.env, argv[i]);
 	}
@@ -163,12 +181,12 @@ void	do_exit(char **argv)
 		exit(0);
 	else if (!strisnum(argv[0]))
 	{
-		printf("exit: %s: numeric argument required\n", argv[0]);
+		ft_puterr3("exit: ", argv[0], ": numeric argument required");
 		exit(255);
 	}
 	else if (argv[0] != NULL && argv[1] != NULL)
 	{
-		printf("exit: too many arguments\n");
+		ft_putendl_fd("exit: too many arguments", 2);
 		return ;
 	}
 	else 

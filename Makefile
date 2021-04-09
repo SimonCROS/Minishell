@@ -9,8 +9,9 @@ SRCS		=	main.c								\
 				gnl/get_next_line.c					\
 				gnl/get_next_line_utils.c			\
 				exec_command.c						\
-				commands.c								\
-				environ.c
+				commands.c							\
+				environ.c							\
+				redirection.c
 
 OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))
 
@@ -19,7 +20,7 @@ NAME		= minishell
 CC			= gcc
 RM			= rm -f
 
-CFLAGS		= -g -Wall -Wextra # -Werror
+CFLAGS		= -Wall -Wextra #-fsanitize=address # -Werror -g
 INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 
 HEADERS		= includes/minishell.h
@@ -28,10 +29,10 @@ all:		$(NAME)
 
 $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			@ mkdir -p $(dir $@);
-			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ -O3
+			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME):	compile_lib $(OBJS)
-			@ $(CC) $(CFLAGS) $(OBJS) $(MLX) $(LIBFT) -o $(NAME)
+			@ $(CC) $(CFLAGS) $(OBJS) $(MLX) $(LIBFT) -o $(NAME) -ltermcap
 
 compile_lib:
 			@ $(MAKE) -C $(LIBFT_DIR)

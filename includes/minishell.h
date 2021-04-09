@@ -2,8 +2,12 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <term.h>
+# include <fcntl.h>
 # include <stdio.h>
 # include <string.h>
+# include <signal.h>
+# include <termios.h>
 # include <sys/stat.h>
 # include <sys/errno.h>
 # include <sys/param.h>
@@ -12,11 +16,14 @@
 
 # define BUFF_SIZE	50
 # define ERROR		-1
+# define CTRL_D		"\4"
 
 /*** Types ********************************************************************/
 
-typedef struct s_gnl_entry	t_gnl_entry;
-typedef struct s_global		t_global;
+typedef struct	s_gnl_entry		t_gnl_entry;
+typedef struct	s_global		t_global;
+typedef struct	s_command		t_command;
+typedef enum	e_command_type	t_command_type;
 
 /*** GNL **********************************************************************/
 
@@ -37,6 +44,27 @@ struct s_global
 
 t_global	global;
 
+/*** Commands *****************************************************************/
+
+enum e_command_type
+{
+    END,
+    COMMAND,
+    TO_FOUND,
+    PIPE,
+    REDIRECT_IN,
+    REDIRECT_OUT,
+};
+
+struct s_command
+{
+    t_list				*args;
+    char				*redirect_in;
+    char				*redirect_out;
+    t_command			*piper;
+    t_command_type		next_command_type;
+};
+
 char		**ft_split_first(char *s, char c);
 int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
@@ -51,5 +79,10 @@ void		do_env(char **argv);
 void		do_exit(char **argv);
 char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
+void		cmd_distributor(char **argv);
+void		do_command(t_command *cmd);
+
+void		ft_puterr2(char *a, char *b);
+void		ft_puterr3(char *a, char *b, char *c);
 
 #endif
