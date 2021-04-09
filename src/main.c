@@ -68,20 +68,21 @@ void	test_adel(void)
 
 	while (ft_strcmp(str, CTRL_D))
 	{
-		tputs("\e7", 1, (int (*)(int))ft_putchar);
+		tputs(tgetstr("sc", NULL), 1, (int (*)(int))ft_putchar);
 		while (1)
 		{
 			len = read(1, str, 100);
 			str[len] = 0;
-			key_up;
-			if (ft_str_equals(str, "\e[A"))
+			printf("0:%d 1:%d 2:%d 3:%d\n", *str, *(str + 1), *(str + 2), *(str + 3));
+			printf("0:%d 1:%d 2:%d 3:%d\n", *key_up, *(key_up + 1), *(key_up + 2), *(key_up + 3));
+			if (FALSE)
 			{
-				tputs("\e8", 1, (int (*)(int))ft_putchar);
+				tputs(tgetstr("rc", NULL), 1, (int (*)(int))ft_putchar);
 				tputs(tgetstr("ce", NULL), 1, (int (*)(int))ft_putchar);
 			}
 			else if (ft_str_equals(str, "\e[B"))
 			{
-				tputs("\e8", 1, (int (*)(int))ft_putchar);
+				tputs(tgetstr("rc", NULL), 1, (int (*)(int))ft_putchar);
 				tputs(tgetstr("ce", NULL), 1, (int (*)(int))ft_putchar);
 			}
 			else if (ft_str_equals(str, tgetstr("kb", NULL)))
