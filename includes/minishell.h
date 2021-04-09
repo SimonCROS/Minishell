@@ -35,7 +35,7 @@ enum e_token_type
 
 struct s_token
 {
-	t_string		*buffer;
+	char			**buffer;
 	t_token_type	token_type;
 	int				quoted;
 };
