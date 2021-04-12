@@ -2,7 +2,18 @@
 
 #include "minishell.h"
 
-void	printline(t_token *token)
+void	print(char *str)
+{
+	printf("%s\n", str);
+}
+
+void	printcommand(t_command *command)
+{
+	lst_foreach(command->args, (t_con)print);
+	printf("\n");
+}
+
+void	printtoken(t_token *token)
 {
 	char	*token_name;
 
@@ -42,7 +53,7 @@ void	printline(t_token *token)
 		token_name, *(token->buffer));
 }
 
-void	*free_token(t_token *token)
+void	free_token(t_token *token)
 {
 	if (token)
 	{
@@ -51,15 +62,13 @@ void	*free_token(t_token *token)
 		free(token->buffer);
 	}
 	free(token);
-	return (NULL);
 }
 
-void	*free_command(t_command *command)
+void	free_command(t_command *command)
 {
 	if (command)
 		lst_destroy(command->args);
 	free(command);
-	return (NULL);
 }
 
 int	token_equals(t_token *t1, t_token *t2)
@@ -84,11 +93,17 @@ t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 	token->separator = type == T_AND || type == T_LAZY_AND || type == T_PIPE;
 	token->buffer = str_new();
 	if (!token->buffer)
-		return (free_token(token));
+	{
+		free_token(token);
+		return (NULL);
+	}
 	if (!tokens)
 		return (token);
 	if (!lst_push(tokens, token))
-		return (free_token(token));
+	{
+		free_token(token);
+		return (NULL);
+	}
 	return (token);
 }
 
@@ -101,20 +116,26 @@ t_command	*new_command(t_list *commands, t_token_type parent_relation)
 		return (NULL);
 	command->args = lst_new(free);
 	if (!command->args)
-		return (free_command(command));
+	{
+		free_command(command);
+		return (NULL);
+	}
 	command->redirect_in = NULL;
 	command->redirect_out = NULL;
 	command->parent_relation = parent_relation;
 	if (!commands)
 		return (command);
 	if (!lst_push(commands, command))
-		return (free_command(command));
+	{
+		free_command(command);
+		return (NULL);
+	}
 	return (command);
 }
 
 t_token	null_token(void)
 {
-	return ((t_token) {NULL, T_EOI, FALSE});
+	return ((t_token){NULL, T_EOI, FALSE, FALSE});
 }
 
 // To protect
@@ -174,37 +195,62 @@ int	is_valid(t_token *token)
 			&& ft_strlen(*(token->buffer)) != 1)
 			return (FALSE);
 	}
+	if (token->quoted)
+	{
+		if (ft_strlen(*(token->buffer)) >= 2 && (*(token->buffer))[0] !=
+			(*(token->buffer))[ft_strlen(*(token->buffer)) - 1])
+			return (FALSE);
+	}
 	return (TRUE);
 }
 
 int	parse(t_list *commands, t_list *tokens)
 {
+	char		*argument;
 	t_token		*prev;
 	t_token		*current;
 	t_command	*command;
 	t_iterator	tokens_iterator;
+	int			space;
 
-	lst_foreach(tokens, (t_con)printline);
 	prev = NULL;
-	command = NULL;
+	space = 1;
+	command = new_command(commands, T_LAZY_AND);
 	tokens_iterator = iterator_new(tokens);
+	argument = NULL;
 	while (iterator_has_next(&tokens_iterator))
 	{
 		current = (t_token *)iterator_next(&tokens_iterator);
+		if (current->token_type == T_WHITESPACE)
+		{
+			space = 1;
+			continue ;
+		}
 		if (!is_valid(current))
 			return (FALSE);
-		if (current->separator && !command)
-		{
-			
-		}
+		else if (current->separator && !prev)
+			return (FALSE);
+		else if (current->separator && prev->separator)
+			return (FALSE);
+		if (current->separator || space)
+			lst_push(command->args, argument);
+		if (current->separator)
+			command = new_command(commands, current->token_type);
+		else
+			str_append(&argument, *(current->buffer));
 		prev = current;
+		space = 0;
 	}
+	lst_foreach(tokens, (t_con)printtoken);
+	printf("---------------");
+	lst_foreach(commands, (t_con)printcommand);
+	return (TRUE);
 }
 
 void	parse_line(char *line)
 {
-	t_list		*tokens;
-	t_list		*commands;
+	t_list	*tokens;
+	t_list	*commands;
 
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
