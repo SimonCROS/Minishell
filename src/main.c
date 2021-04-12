@@ -42,11 +42,24 @@ void	printline(t_token *token)
 		token_name, *(token->buffer));
 }
 
-void	free_token(t_token *token)
+void	*free_token(t_token *token)
 {
-	free(*(token->buffer));
-	free(token->buffer);
+	if (token)
+	{
+		if (token->buffer)
+			free(*(token->buffer));
+		free(token->buffer);
+	}
 	free(token);
+	return (NULL);
+}
+
+void	*free_command(t_command *command)
+{
+	if (command)
+		lst_destroy(command->args);
+	free(command);
+	return (NULL);
 }
 
 int	token_equals(t_token *t1, t_token *t2)
@@ -66,26 +79,52 @@ t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 	token = malloc(sizeof(t_token));
 	if (!token)
 		return (NULL);
-	token->buffer = str_new();
-	if (!token->buffer)
-		return (0);
 	token->token_type = type;
 	token->quoted = type == T_DOUBLE_QUOTE || type == T_SINGLE_QUOTE;
+	token->separator = type == T_AND || type == T_LAZY_AND || type == T_PIPE;
+	token->buffer = str_new();
+	if (!token->buffer)
+		return (free_token(token));
 	if (!tokens)
 		return (token);
-	return (lst_push(tokens, token));
+	if (!lst_push(tokens, token))
+		return (free_token(token));
+	return (token);
+}
+
+t_command	*new_command(t_list *commands, t_token_type parent_relation)
+{
+	t_command	*command;
+
+	command = malloc(sizeof(t_command));
+	if (!command)
+		return (NULL);
+	command->args = lst_new(free);
+	if (!command->args)
+		return (free_command(command));
+	command->redirect_in = NULL;
+	command->redirect_out = NULL;
+	command->parent_relation = parent_relation;
+	if (!commands)
+		return (command);
+	if (!lst_push(commands, command))
+		return (free_command(command));
+	return (command);
+}
+
+t_token	null_token(void)
+{
+	return ((t_token) {NULL, T_EOI, FALSE});
 }
 
 // To protect
-void	tokenize(t_list	*tokens, char *line)
+void	tokenize(t_list *tokens, char *line)
 {
 	t_token	*current;
 	int		escaped;
 	t_token	empty;
 
-	empty.buffer = NULL;
-	empty.token_type = T_EOI;
-	empty.quoted = FALSE;
+	empty = null_token();
 	current = &empty;
 	escaped = 0;
 	while (*line)
@@ -124,19 +163,57 @@ void	tokenize(t_list	*tokens, char *line)
 	}
 }
 
-void	parse_line(char *line)
+int	is_valid(t_token *token)
 {
-	t_list	*tokens;
+	if (token->separator)
+	{
+		if (token->token_type == T_AND && ft_strlen(*(token->buffer)) != 2)
+			return (FALSE);
+		else if ((token->token_type == T_LAZY_AND
+				|| token->token_type == T_PIPE)
+			&& ft_strlen(*(token->buffer)) != 1)
+			return (FALSE);
+	}
+	return (TRUE);
+}
 
-	tokens = lst_new((t_con)free_token);
-	tokenize(tokens, line);
-
-	// lst_find_first(list)
+int	parse(t_list *commands, t_list *tokens)
+{
+	t_token		*prev;
+	t_token		*current;
+	t_command	*command;
+	t_iterator	tokens_iterator;
 
 	lst_foreach(tokens, (t_con)printline);
+	prev = NULL;
+	command = NULL;
+	tokens_iterator = iterator_new(tokens);
+	while (iterator_has_next(&tokens_iterator))
+	{
+		current = (t_token *)iterator_next(&tokens_iterator);
+		if (!is_valid(current))
+			return (FALSE);
+		if (current->separator && !command)
+		{
+			
+		}
+		prev = current;
+	}
+}
+
+void	parse_line(char *line)
+{
+	t_list		*tokens;
+	t_list		*commands;
+
+	tokens = lst_new((t_con)free_token);
+	commands = lst_new((t_con)free_command);
+
+	tokenize(tokens, line);
+	if (!parse(commands, tokens))
+		printf("Ah !\n");
+
 	lst_destroy(tokens);
-	// free(*(and.buffer));
-	// free(and.buffer);
 }
 
 void	test(void)
