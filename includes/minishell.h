@@ -29,7 +29,8 @@ enum e_token_type
 	T_PIPE,
 	T_REDIRECT_IN,
 	T_REDIRECT_OUT,
-	T_EOI
+	T_DOLLAR,
+	T_NONE
 };
 
 struct s_token

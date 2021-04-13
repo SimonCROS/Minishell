@@ -4,7 +4,7 @@
 
 void	print(char *str)
 {
-	printf("%s\n", str);
+	printf("|%s| ", str);
 }
 
 void	printcommand(t_command *command)
@@ -45,6 +45,9 @@ void	printtoken(t_token *token)
 			break;
 		case T_REDIRECT_OUT:
 			token_name = "out";
+			break;
+		case T_DOLLAR:
+			token_name = "dollar";
 			break;
 		default:
 			token_name = "eoi";
@@ -135,7 +138,7 @@ t_command	*new_command(t_list *commands, t_token_type parent_relation)
 
 t_token	null_token(void)
 {
-	return ((t_token){NULL, T_EOI, FALSE, FALSE});
+	return ((t_token){NULL, T_NONE, FALSE, FALSE});
 }
 
 // To protect
@@ -168,7 +171,9 @@ void	tokenize(t_list *tokens, char *line)
 				current = new_token(tokens, T_LAZY_AND, current);
 			else if (*line == '&')
 				current = new_token(tokens, T_AND, current);
-			else
+			else if (*line == '$')
+				current = new_token(tokens, T_DOLLAR, current);
+			else if (current->token_type != T_DOLLAR)
 				current = new_token(tokens, T_WORD, current);
 			if (*line == '\\')
 				escaped = 2;
@@ -204,6 +209,12 @@ int	is_valid(t_token *token)
 	return (TRUE);
 }
 
+int	parse_text_token(t_command *command, t_token *token)
+{
+	
+	return (TRUE);
+}
+
 int	parse(t_list *commands, t_list *tokens)
 {
 	char		*argument;
@@ -214,7 +225,7 @@ int	parse(t_list *commands, t_list *tokens)
 	int			space;
 
 	prev = NULL;
-	space = 1;
+	space = 0;
 	command = new_command(commands, T_LAZY_AND);
 	tokens_iterator = iterator_new(tokens);
 	argument = NULL;
@@ -232,8 +243,11 @@ int	parse(t_list *commands, t_list *tokens)
 			return (FALSE);
 		else if (current->separator && prev->separator)
 			return (FALSE);
-		if (current->separator || space)
+		if ((current->separator || space) && argument)
+		{
 			lst_push(command->args, argument);
+			argument = NULL;
+		}
 		if (current->separator)
 			command = new_command(commands, current->token_type);
 		else
@@ -241,8 +255,10 @@ int	parse(t_list *commands, t_list *tokens)
 		prev = current;
 		space = 0;
 	}
+	if (argument)
+		lst_push(command->args, argument);
 	lst_foreach(tokens, (t_con)printtoken);
-	printf("---------------");
+	printf("---------------\n");
 	lst_foreach(commands, (t_con)printcommand);
 	return (TRUE);
 }
