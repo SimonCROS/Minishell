@@ -142,51 +142,61 @@ t_token	null_token(void)
 }
 
 // To protect
-void	tokenize(t_list *tokens, char *line)
+int	tokenize(t_list *tokens, char *line)
 {
 	t_token	*current;
 	int		escaped;
 	t_token	empty;
+	int		i;
 
 	empty = null_token();
 	current = &empty;
 	escaped = 0;
-	while (*line)
+	i = -1;
+	while (line[++i])
 	{
 		if (!current->quoted && !escaped)
 		{
-			if (*line == '|')
+			if (line[i] == '|')
 				current = new_token(tokens, T_PIPE, current);
-			else if (*line == '\"')
+			else if (line[i] == '\"')
 				current = new_token(tokens, T_DOUBLE_QUOTE, current);
-			else if (*line == '\'')
+			else if (line[i] == '\'')
 				current = new_token(tokens, T_SINGLE_QUOTE, current);
-			else if (*line == ' ')
+			else if (line[i] == ' ')
 				current = new_token(tokens, T_WHITESPACE, current);
-			else if (*line == '<')
+			else if (line[i] == '<')
 				current = new_token(tokens, T_REDIRECT_IN, current);
-			else if (*line == '>')
+			else if (line[i] == '>')
 				current = new_token(tokens, T_REDIRECT_OUT, current);
-			else if (*line == ';')
+			else if (line[i] == ';')
 				current = new_token(tokens, T_LAZY_AND, current);
-			else if (*line == '&')
+			else if (line[i] == '&')
 				current = new_token(tokens, T_AND, current);
-			else if (*line == '$')
+			else if (line[i] == '$')
 				current = new_token(tokens, T_DOLLAR, current);
-			else if (current->token_type != T_DOLLAR)
+			else if (current->token_type != T_DOLLAR || line[i] == '\\')
+			{
 				current = new_token(tokens, T_WORD, current);
-			if (*line == '\\')
-				escaped = 2;
+				if (line[i] == '\\')
+				{
+					escaped = 1;
+					i++;
+				}
+			}
 		}
-		else if (*line == **(current->buffer) && !escaped)
+		else if (line[i] == **(current->buffer) && !escaped)
 		{
-			str_cappend(current->buffer, *(line++));
+			str_cappend(current->buffer, line[i]);
 			current = &empty;
 			continue ;
 		}
-		str_cappend(current->buffer, *(line++));
-		escaped /= 2;
+		if (!line[i])
+			return (FALSE);
+		str_cappend(current->buffer, line[i]);
+		escaped = 0;
 	}
+	return (TRUE);
 }
 
 int	is_valid(t_token *token)
@@ -271,8 +281,7 @@ void	parse_line(char *line)
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
 
-	tokenize(tokens, line);
-	if (!parse(commands, tokens))
+	if (!tokenize(tokens, line) || !parse(commands, tokens))
 		printf("Ah !\n");
 
 	lst_destroy(tokens);
