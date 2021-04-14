@@ -59,8 +59,8 @@ int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 struct s_command
 {
 	t_list			*args;
-	char			*redirect_in;
-	char			*redirect_out;
+	t_list			*redirect_in;
+	t_list			*redirect_out;
 	t_token_type	parent_relation;
 };
 

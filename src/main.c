@@ -216,13 +216,26 @@ int	is_valid(t_token *token)
 			(*(token->buffer))[ft_strlen(*(token->buffer)) - 1])
 			return (FALSE);
 	}
+	if (token->token_type == T_REDIRECT_IN && ft_strlen(*(token->buffer)) > 1)
+		return (FALSE);
+	if (token->token_type == T_REDIRECT_OUT && ft_strlen(*(token->buffer)) > 2)
+		return (FALSE);
 	return (TRUE);
+}
+
+char	*parse_variable(char *str)
+{
+	if (!str[1])
+		return ("$");
+	return (/* parse */str);
 }
 
 int	parse_token(char **container, t_token *token)
 {
 	if (token->quoted)
 		str_append(container, ft_substr(*(token->buffer), 1, ft_strlen(*(token->buffer)) - 2));
+	else if (token->token_type == T_DOLLAR)
+		str_append(container, parse_variable(*(token->buffer)));
 	else
 		str_append(container, *(token->buffer));
 	return (TRUE);
@@ -283,7 +296,7 @@ void	parse_line(char *line)
 	commands = lst_new((t_con)free_command);
 
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
-		printf("Ah !\n");
+		printf("\033[34mAh !\033[0m\n");
 
 	lst_foreach(tokens, (t_con)printtoken);
 	printf("---------------\n");
