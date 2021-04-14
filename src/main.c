@@ -219,9 +219,12 @@ int	is_valid(t_token *token)
 	return (TRUE);
 }
 
-int	parse_text_token(t_command *command, t_token *token)
+int	parse_token(char **container, t_token *token)
 {
-	
+	if (token->quoted)
+		str_append(container, ft_substr(*(token->buffer), 1, ft_strlen(*(token->buffer)) - 2));
+	else
+		str_append(container, *(token->buffer));
 	return (TRUE);
 }
 
@@ -261,15 +264,13 @@ int	parse(t_list *commands, t_list *tokens)
 		if (current->separator)
 			command = new_command(commands, current->token_type);
 		else
-			str_append(&argument, *(current->buffer));
+			if (!parse_token(&argument, current))
+				return (FALSE);
 		prev = current;
 		space = 0;
 	}
 	if (argument)
 		lst_push(command->args, argument);
-	lst_foreach(tokens, (t_con)printtoken);
-	printf("---------------\n");
-	lst_foreach(commands, (t_con)printcommand);
 	return (TRUE);
 }
 
@@ -283,6 +284,10 @@ void	parse_line(char *line)
 
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
 		printf("Ah !\n");
+
+	lst_foreach(tokens, (t_con)printtoken);
+	printf("---------------\n");
+	lst_foreach(commands, (t_con)printcommand);
 
 	lst_destroy(tokens);
 }

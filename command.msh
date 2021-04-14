@@ -1,4 +1,4 @@
-cmd='echo abc	| grep "b" && ./a.out \"not_quote "quote\\nline not simple"simple a b c d';
+cmd='echo abc	| grep "b" && ./a.out \"not_quote "quote\\nline not simple"next a b c d';
 
 ./a.out $cmd
 
