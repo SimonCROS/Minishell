@@ -155,6 +155,13 @@ int	tokenize(t_list *tokens, char *line)
 	i = -1;
 	while (line[++i])
 	{
+		if (line[i] == '\\' && !escaped)
+		{
+			if (!current->quoted)
+				current = new_token(tokens, T_WORD, current);
+			escaped = 1;
+			continue ;
+		}
 		if (!current->quoted && !escaped)
 		{
 			if (line[i] == '|')
@@ -163,7 +170,7 @@ int	tokenize(t_list *tokens, char *line)
 				current = new_token(tokens, T_DOUBLE_QUOTE, current);
 			else if (line[i] == '\'')
 				current = new_token(tokens, T_SINGLE_QUOTE, current);
-			else if (line[i] == ' ')
+			else if (line[i] == ' ' || line[i] == '\t')
 				current = new_token(tokens, T_WHITESPACE, current);
 			else if (line[i] == '<')
 				current = new_token(tokens, T_REDIRECT_IN, current);
@@ -175,15 +182,8 @@ int	tokenize(t_list *tokens, char *line)
 				current = new_token(tokens, T_AND, current);
 			else if (line[i] == '$')
 				current = new_token(tokens, T_DOLLAR, current);
-			else if (current->token_type != T_DOLLAR || line[i] == '\\')
-			{
+			else if (current->token_type != T_DOLLAR)
 				current = new_token(tokens, T_WORD, current);
-				if (line[i] == '\\')
-				{
-					escaped = 1;
-					i++;
-				}
-			}
 		}
 		else if (line[i] == **(current->buffer) && !escaped)
 		{
@@ -191,12 +191,12 @@ int	tokenize(t_list *tokens, char *line)
 			current = &empty;
 			continue ;
 		}
-		if (!line[i])
-			return (FALSE);
+		if (current->token_type == T_NONE)
+			current = new_token(tokens, T_WORD, current);
 		str_cappend(current->buffer, line[i]);
 		escaped = 0;
 	}
-	return (TRUE);
+	return (!escaped);
 }
 
 int	is_valid(t_token *token)
@@ -212,7 +212,7 @@ int	is_valid(t_token *token)
 	}
 	if (token->quoted)
 	{
-		if (ft_strlen(*(token->buffer)) >= 2 && (*(token->buffer))[0] !=
+		if (ft_strlen(*(token->buffer)) < 2 || (*(token->buffer))[0] !=
 			(*(token->buffer))[ft_strlen(*(token->buffer)) - 1])
 			return (FALSE);
 	}

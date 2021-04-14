@@ -20,6 +20,7 @@ typedef struct s_command	t_command;
 
 enum e_token_type
 {
+	T_NONE,
 	T_WORD,
 	T_WHITESPACE,
 	T_LAZY_AND,
@@ -29,8 +30,7 @@ enum e_token_type
 	T_PIPE,
 	T_REDIRECT_IN,
 	T_REDIRECT_OUT,
-	T_DOLLAR,
-	T_NONE
+	T_DOLLAR
 };
 
 struct s_token
