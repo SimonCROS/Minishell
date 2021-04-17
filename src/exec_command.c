@@ -16,7 +16,7 @@ char	**get_env_path(char *path)
 	char	*val;
 
 	new_path = ft_strjoin("/", path);
-	val = map_get(global.env, "PATH");
+	val = map_get(g_global.env, "PATH");
 	env_path = ft_split(val, ':');
 	i = -1;
 	while (env_path[++i])
@@ -55,8 +55,8 @@ char	**map_as_array(void)
 	int				i;
 
 	i = 0;
-	array = malloc(sizeof(char *) * (global.env->size + 1));
-	iter = citerator_new((const t_clist *)global.env);
+	array = malloc(sizeof(char *) * (g_global.env->size + 1));
+	iter = citerator_new((const t_clist *)g_global.env);
 	while (citerator_has_next(&iter))
 	{
 		elem = citerator_next(&iter);

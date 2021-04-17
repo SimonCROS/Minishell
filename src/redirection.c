@@ -5,11 +5,13 @@ void	redirect_out(t_command *cmd)
 	int		out_fd;
 	int		pid;
 
+	if (lst_is_empty(cmd->redirect_out))
+		return ;
 	pid = fork();
 	wait(NULL);
 	if (pid == 0)
 	{
-		out_fd = open(cmd->redirect_out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (out_fd == -1)
 		{
 			ft_puterr2(">: ", strerror(errno));
@@ -35,11 +37,13 @@ void	append(t_command *cmd)
 	int		out_fd;
 	int		pid;
 
+	if (lst_is_empty(cmd->redirect_out))
+		return ;
 	pid = fork();
 	wait(NULL);
 	if (pid == 0)
 	{
-		out_fd = open(cmd->redirect_out, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_APPEND, 0644);
 		if (out_fd == -1)
 		{
 			ft_puterr2(">>: ", strerror(errno));
@@ -65,11 +69,13 @@ void	redirect_in(t_command *cmd)
 	int		in_fd;
 	int		pid;
 
+	if (lst_is_empty(cmd->redirect_in))
+		return ;
 	pid = fork();
 	wait(NULL);
 	if (pid == 0)
 	{
-		in_fd = open(cmd->redirect_in, O_RDONLY);
+		in_fd = open(lst_last(cmd->redirect_in), O_RDONLY);
 		if (in_fd == -1)
 		{
 			ft_puterr2("<: ", strerror(errno));
@@ -92,8 +98,8 @@ void	redirect_in(t_command *cmd)
 
 void	piper(t_command *cmd)
 {
-	int		fd[2];
-	int		pid;
+	int	fd[2];
+	int	pid;
 
 	if (pipe(fd) == -1)
 	{
@@ -110,7 +116,7 @@ void	piper(t_command *cmd)
 			return ;
 		}
 		close(fd[1]);
-		cmd_distributor((char **)as_array(cmd->piper->args));
+		cmd_distributor((char **)as_array(cmd->args));
 	}
 	else
 	{
@@ -142,6 +148,5 @@ void	do_command(t_command *cmd)
 	// cmd->piper = &p;
 	// piper(cmd);
 
-	cmd->redirect_out = "test";
 	append(cmd);
 }

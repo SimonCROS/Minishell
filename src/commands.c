@@ -44,7 +44,7 @@ void	do_cd(char **argv)
 	if (argv[0] == NULL)
 	{
 		i = -1;
-		ft_strcpy(path, map_get(global.env, "HOME"));
+		ft_strcpy(path, map_get(g_global.env, "HOME"));
 		ft_strlcat(path, "/", MAXPATHLEN);
 		ret = chdir(path);
 	}
@@ -65,7 +65,7 @@ void	do_pwd(char **argv)
 		ft_putendl_fd("pwd: too many arguments", 2);
 		return ;
 	}
-	path = getcwd(global.pwd, MAXPATHLEN);
+	path = getcwd(g_global.pwd, MAXPATHLEN);
 	ft_strlen(path);
 	if (path == NULL)
 		ft_putendl_fd(strerror(errno), 2);
@@ -97,7 +97,7 @@ void	do_export(char **argv)
 	i = -1;
 	if (!*argv)
 	{
-		sort = map_sort(global.env, (t_com)ft_strcmp);
+		sort = map_sort(g_global.env, (t_com)ft_strcmp);
 		iter = citerator_new((const t_clist *)sort);
 		while (citerator_has_next(&iter))
 		{
@@ -116,18 +116,18 @@ void	do_export(char **argv)
 		{
 			if (!check_export_arg(res->first->value))
 				ft_puterr3("export: '", res->first->value, "': not a valid identifier");
-			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=' && map_contains_key(global.env, res->first->value))
-				map_replace(global.env, lst_shift(res), ft_strdup(""));
+			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=' && map_contains_key(g_global.env, res->first->value))
+				map_replace(g_global.env, lst_shift(res), ft_strdup(""));
 			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=')
-				map_put(global.env, lst_shift(res), ft_strdup(""));
-			else if (res->size == 1 && map_contains_key(global.env, res->first->value))
-				map_replace(global.env, lst_shift(res), NULL);
+				map_put(g_global.env, lst_shift(res), ft_strdup(""));
+			else if (res->size == 1 && map_contains_key(g_global.env, res->first->value))
+				map_replace(g_global.env, lst_shift(res), NULL);
 			else if (res->size == 1)
-				map_put(global.env, lst_shift(res), NULL);
-			else if (res->size >= 2 && map_contains_key(global.env, res->first->value))
-				map_replace(global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
+				map_put(g_global.env, lst_shift(res), NULL);
+			else if (res->size >= 2 && map_contains_key(g_global.env, res->first->value))
+				map_replace(g_global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
 			else if (res->size >= 2)
-				map_put(global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
+				map_put(g_global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
 			lst_destroy(res);
 		}
 	}
@@ -140,7 +140,7 @@ void	do_env(char **argv)
 
 	if (*argv != NULL)
 		ft_putendl_fd("env: too many arguments", 2);
-	iter = citerator_new((const t_clist *)global.env);
+	iter = citerator_new((const t_clist *)g_global.env);
 	while (citerator_has_next(&iter))
 	{
 		elem = citerator_next(&iter);
@@ -170,7 +170,7 @@ void	do_unset(char **argv)
 		if (!check_export_arg(argv[i]))
 			ft_puterr3("export: '", argv[i], "': not a valid identifier");
 		else
-			map_delete(global.env, argv[i]);
+			map_delete(g_global.env, argv[i]);
 	}
 }
 

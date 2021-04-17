@@ -27,8 +27,8 @@ void	term_load(void)
 	char			*term_name;
 	struct termios	term;
 	
-	if (map_contains_key(global.env, "TERM"))
-		term_name = map_get(global.env, "TERM");
+	if (map_contains_key(g_global.env, "TERM"))
+		term_name = map_get(g_global.env, "TERM");
 	else
 	{
 		ft_putendl_fd("Impossible to determine the terminal\n", 2);
@@ -73,8 +73,6 @@ void	test_adel(void)
 		{
 			len = read(1, str, 100);
 			str[len] = 0;
-			printf("0:%d 1:%d 2:%d 3:%d\n", *str, *(str + 1), *(str + 2), *(str + 3));
-			printf("0:%d 1:%d 2:%d 3:%d\n", *key_up, *(key_up + 1), *(key_up + 2), *(key_up + 3));
 			if (FALSE)
 			{
 				tputs(tgetstr("rc", NULL), 1, (int (*)(int))ft_putchar);

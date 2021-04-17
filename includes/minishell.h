@@ -12,25 +12,26 @@
 # include <sys/errno.h>
 # include <sys/param.h>
 
+/*** Types ********************************************************************/
+
+typedef struct s_global		t_global;
+
+typedef struct s_gnl_entry	t_gnl_entry;
+
+typedef struct s_command	t_command;
+
+typedef struct s_token		t_token;
+typedef enum e_token_type	t_token_type;
+
+void	test(void); // TO RM
+
 /*** Definitions **************************************************************/
 
 # define BUFF_SIZE	50
 # define ERROR		-1
 # define CTRL_D		"\4"
 
-/*** Types ********************************************************************/
-
-typedef struct	s_gnl_entry		t_gnl_entry;
-typedef struct	s_global		t_global;
-typedef struct	s_command		t_command;
-typedef enum	e_command_type	t_command_type;
-
-typedef struct s_token		t_token;
-typedef enum e_token_type	t_token_type;
-
-typedef struct s_command	t_command;
-
-void	test(void); // TO RM
+t_global	g_global;
 
 /*** Tokenizer ****************************************************************/
 
@@ -71,10 +72,6 @@ struct s_global
 	char	pwd[MAXPATHLEN];
 	t_map	*env;
 };
-
-/*** Global variables *********************************************************/
-
-t_global	global;
 
 /*** Commands *****************************************************************/
 
