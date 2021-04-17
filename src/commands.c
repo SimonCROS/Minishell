@@ -17,6 +17,7 @@ void	do_echo(char **argv)
 {
 	int		endl;
 
+	g_global.cmd_ret = 0;
 	endl = 1;
 	if (*argv && !ft_strcmp(*argv, "-n"))
 	{
@@ -36,39 +37,57 @@ void	do_echo(char **argv)
 
 void	do_cd(char **argv)
 {
-	int		ret;
 	int		i;
 	char	path[MAXPATHLEN];
+	char	*home;
 
-	ret = 0;
+	g_global.cmd_ret = 0;
 	if (argv[0] == NULL)
 	{
 		i = -1;
-		ft_strcpy(path, map_get(g_global.env, "HOME"));
+		home = map_get(g_global.env, "HOME");
+		if (home == NULL)
+		{
+			ft_putendl_fd("cd: HOME not set", 2);
+			g_global.cmd_ret = NOT_SET;
+			return ;
+		}
+		ft_strcpy(path, home);
 		ft_strlcat(path, "/", MAXPATHLEN);
-		ret = chdir(path);
+		g_global.cmd_ret = chdir(path);
 	}
 	else if (argv[1] != NULL)
+	{
 		ft_putendl_fd("cd: too many arguments", 2);
+		g_global.cmd_ret = TOO_MANY_ARGS;
+	}
 	else
-		ret = chdir(argv[0]);
-	if (ret == ERROR)
+		g_global.cmd_ret = chdir(argv[0]);
+	if (g_global.cmd_ret == ERROR)
+	{
 		ft_putendl_fd(strerror(errno), 2);
+		g_global.cmd_ret = errno;
+	}
 }
 
 void	do_pwd(char **argv)
 {
 	char	*path;
 
+	g_global.cmd_ret = 0;
 	if (argv[0] != NULL)
 	{
 		ft_putendl_fd("pwd: too many arguments", 2);
+		g_global.cmd_ret = TOO_MANY_ARGS;
 		return ;
 	}
 	path = getcwd(g_global.pwd, MAXPATHLEN);
 	ft_strlen(path);
 	if (path == NULL)
+	{
 		ft_putendl_fd(strerror(errno), 2);
+		g_global.cmd_ret = errno;
+	}
 	else
 		ft_putendl(path);
 }
@@ -94,6 +113,7 @@ void	do_export(char **argv)
 	t_list			*res;
 	int				i;
 
+	g_global.cmd_ret = 0;
 	i = -1;
 	if (!*argv)
 	{
@@ -115,7 +135,10 @@ void	do_export(char **argv)
 		if (res != NULL)
 		{
 			if (!check_export_arg(res->first->value))
+			{
 				ft_puterr3("export: '", res->first->value, "': not a valid identifier");
+				g_global.cmd_ret = NOT_VALID;
+			}
 			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=' && map_contains_key(g_global.env, res->first->value))
 				map_replace(g_global.env, lst_shift(res), ft_strdup(""));
 			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=')
@@ -138,8 +161,13 @@ void	do_env(char **argv)
 	t_citerator		iter;
 	t_mapentry		*elem;
 
+	g_global.cmd_ret = 0;
 	if (*argv != NULL)
+	{
 		ft_putendl_fd("env: too many arguments", 2);
+		g_global.cmd_ret = TOO_MANY_ARGS;
+		return ;
+	}
 	iter = citerator_new((const t_clist *)g_global.env);
 	while (citerator_has_next(&iter))
 	{
@@ -164,21 +192,28 @@ void	do_unset(char **argv)
 {
 	int		i;
 
+	g_global.cmd_ret = 0;
 	i = -1;
 	while (argv[++i])
 	{
 		if (!check_export_arg(argv[i]))
+		{
 			ft_puterr3("export: '", argv[i], "': not a valid identifier");
+			g_global.cmd_ret = NOT_VALID;
+		}
 		else
+		{
 			map_delete(g_global.env, argv[i]);
+			g_global.cmd_ret = 0;
+		}
 	}
 }
 
 void	do_exit(char **argv)
 {
-	printf("exit\n");
+	ft_putendl_fd("exit", 1);
 	if (argv[0] == NULL)
-		exit(0);
+		exit(g_global.cmd_ret);
 	else if (!strisnum(argv[0]))
 	{
 		ft_puterr3("exit: ", argv[0], ": numeric argument required");
@@ -187,6 +222,7 @@ void	do_exit(char **argv)
 	else if (argv[0] != NULL && argv[1] != NULL)
 	{
 		ft_putendl_fd("exit: too many arguments", 2);
+		g_global.cmd_ret = TOO_MANY_ARGS;
 		return ;
 	}
 	else 

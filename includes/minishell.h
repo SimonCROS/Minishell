@@ -27,9 +27,12 @@ void	test(void); // TO RM
 
 /*** Definitions **************************************************************/
 
-# define BUFF_SIZE	50
-# define ERROR		-1
-# define CTRL_D		"\4"
+# define BUFF_SIZE		50
+# define ERROR			-1
+# define CTRL_D			"\4"
+# define TOO_MANY_ARGS	-2
+# define NOT_VALID		-3
+# define NOT_SET		-4
 
 t_global	g_global;
 
@@ -69,8 +72,11 @@ struct s_gnl_entry
 
 struct s_global
 {
-	char	pwd[MAXPATHLEN];
-	t_map	*env;
+	char			pwd[MAXPATHLEN];
+	t_map			*env;
+	int				cmd_ret;
+	struct termios	term;
+	struct termios	save;
 };
 
 /*** Commands *****************************************************************/

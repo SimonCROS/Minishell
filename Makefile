@@ -33,7 +33,7 @@ $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME):	compile_lib $(OBJS)
-			@ $(CC) $(CFLAGS) $(OBJS) $(MLX) $(LIBFT) -o $(NAME) -ltermcap
+			@ $(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME) -ltermcap
 
 compile_lib:
 			@ $(MAKE) -C $(LIBFT_DIR)
