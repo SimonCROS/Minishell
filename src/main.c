@@ -67,7 +67,7 @@ void	test_adel(void)
 	t_list		*history;
 	char		str[2000];
 	char		**line;
-	t_command	cmd;
+	t_command	*cmd;
 
 	history = lst_new(free);
 	count = 0;
@@ -113,10 +113,10 @@ void	test_adel(void)
 		}
 		ft_putchar('\n');
 		tcsetattr(0, TCSANOW, &g_global.save);
-		cmd.args = as_listf((void **)ft_split(*line, ' '), free);
+		cmd = lst_first(parse_line(*line));
 		free(*line);
-		cmd_distributor((char **)as_array(cmd.args));
-		lst_destroy(cmd.args);
+		if (cmd)
+			cmd_distributor((char **)as_array(cmd->args));
 		free(line);
 	}
 	// while (ft_strcmp(str, CTRL_D))

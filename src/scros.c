@@ -287,7 +287,7 @@ int	parse(t_list *commands, t_list *tokens)
 	return (TRUE);
 }
 
-void	parse_line(char *line)
+t_list	*parse_line(char *line)
 {
 	t_list	*tokens;
 	t_list	*commands;
@@ -296,25 +296,12 @@ void	parse_line(char *line)
 	commands = lst_new((t_con)free_command);
 
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
-		printf("\033[34mAh !\033[0m\n");
+		printf("\033[32mAh !\033[0m\n");
 
-	lst_foreach(tokens, (t_con)printtoken);
-	printf("---------------\n");
-	lst_foreach(commands, (t_con)printcommand);
+	// lst_foreach(tokens, (t_con)printtoken);
+	// printf("---------------\n");
+	// lst_foreach(commands, (t_con)printcommand);
 
 	lst_destroy(tokens);
-}
-
-void	test(void)
-{
-	int			result;
-	char		*buffer;
-
-	result = 1;
-	while (result)
-	{
-		result = get_next_line(0, &buffer);
-		parse_line(buffer);
-		free(buffer);
-	}
+	return (commands);
 }

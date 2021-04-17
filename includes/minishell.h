@@ -23,7 +23,7 @@ typedef struct s_command	t_command;
 typedef struct s_token		t_token;
 typedef enum e_token_type	t_token_type;
 
-void	test(void); // TO RM
+t_global					g_global;
 
 /*** Definitions **************************************************************/
 
@@ -33,8 +33,6 @@ void	test(void); // TO RM
 # define TOO_MANY_ARGS	-2
 # define NOT_VALID		-3
 # define NOT_SET		-4
-
-t_global	g_global;
 
 /*** Tokenizer ****************************************************************/
 
@@ -61,6 +59,10 @@ struct s_token
 	int				separator;
 };
 
+/*** Parsing ******************************************************************/
+
+t_list		*parse_line(char *line);
+
 /*** GNL **********************************************************************/
 
 struct s_gnl_entry
@@ -80,16 +82,6 @@ struct s_global
 };
 
 /*** Commands *****************************************************************/
-
-enum e_command_type
-{
-    END,
-    COMMAND,
-    TO_FOUND,
-    PIPE,
-    REDIRECT_IN,
-    REDIRECT_OUT,
-};
 
 struct s_command
 {
