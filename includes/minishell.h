@@ -14,9 +14,12 @@
 
 /*** Definitions **************************************************************/
 
-# define BUFF_SIZE	50
-# define ERROR		-1
-# define CTRL_D		"\4"
+# define BUFF_SIZE		50
+# define ERROR			-1
+# define CTRL_D			"\4"
+# define TOO_MANY_ARGS	-2
+# define NOT_VALID		-3
+# define NOT_SET		-4
 
 /*** Types ********************************************************************/
 
@@ -24,6 +27,7 @@ typedef struct	s_gnl_entry		t_gnl_entry;
 typedef struct	s_global		t_global;
 typedef struct	s_command		t_command;
 typedef enum	e_command_type	t_command_type;
+typedef struct	s_shell			t_shell;
 
 /*** GNL **********************************************************************/
 
@@ -34,10 +38,18 @@ struct s_gnl_entry
 	char	*content;
 };
 
+struct s_shell
+{
+	struct termios	term;
+	struct termios	save;
+};
+
 struct s_global
 {
 	char	pwd[MAXPATHLEN];
 	t_map	*env;
+	int		cmd_ret;
+	t_shell	shell;
 };
 
 /*** Global variables *********************************************************/

@@ -76,6 +76,7 @@ void	do_execute(char *path, char **argv)
 	char	**env_path;
 	char	**array;
 
+	global.cmd_ret = 0;
 	array = map_as_array();
 	if (file_exists(path))
 	{
@@ -83,7 +84,10 @@ void	do_execute(char *path, char **argv)
 		wait(NULL);
 		if (pid == 0)
 			if (execve(path, argv, array) == ERROR)
+			{
 				ft_putendl_fd(strerror(errno), 2);
+				global.cmd_ret = errno;
+			}
 		return ;
 	}
 	env_path = get_env_path(path);
@@ -101,11 +105,17 @@ void	do_execute(char *path, char **argv)
 		if (pid == 0)
 		{
 			if (execve(path, argv, array) == ERROR)
+			{
 				ft_putendl_fd(strerror(errno), 2);
+				global.cmd_ret = errno;
+			}
 		}
 	}
 	else
-		ft_puterr2("sh: command not found: ", path);
+	{
+		ft_puterr2("minish: command not found: ", path);
+		global.cmd_ret = errno;
+	}
 	i = -1;
 	while (array[++i])
 		free(array[i]);
