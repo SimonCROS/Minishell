@@ -2,14 +2,28 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <term.h>
+# include <fcntl.h>
+# include <stdio.h>
+# include <string.h>
+# include <signal.h>
+# include <termios.h>
+# include <sys/stat.h>
+# include <sys/errno.h>
+# include <sys/param.h>
 
 /*** Definitions **************************************************************/
 
-# define BUFF_SIZE 50
+# define BUFF_SIZE	50
+# define ERROR		-1
+# define CTRL_D		"\4"
 
 /*** Types ********************************************************************/
 
-typedef struct s_gnl_entry	t_gnl_entry;
+typedef struct	s_gnl_entry		t_gnl_entry;
+typedef struct	s_global		t_global;
+typedef struct	s_command		t_command;
+typedef enum	e_command_type	t_command_type;
 
 typedef struct s_token		t_token;
 typedef enum e_token_type	t_token_type;
@@ -52,11 +66,27 @@ struct s_gnl_entry
 	char	*content;
 };
 
-char		**ft_split_first(char *s, char c);
-int			get_next_line(int fd, char **line);
-int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
+struct s_global
+{
+	char	pwd[MAXPATHLEN];
+	t_map	*env;
+};
 
-/*** Modeles ******************************************************************/
+/*** Global variables *********************************************************/
+
+t_global	global;
+
+/*** Commands *****************************************************************/
+
+enum e_command_type
+{
+    END,
+    COMMAND,
+    TO_FOUND,
+    PIPE,
+    REDIRECT_IN,
+    REDIRECT_OUT,
+};
 
 struct s_command
 {
@@ -65,5 +95,27 @@ struct s_command
 	t_list			*redirect_out;
 	t_token_type	parent_relation;
 };
+
+char		**ft_split_first(char *s, char c);
+int			get_next_line(int fd, char **line);
+int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
+
+/*** Modeles ******************************************************************/
+
+void		do_execute(char *path, char **argv);
+void		do_pwd(char **argv);
+void		do_cd(char **argv);
+void		do_echo(char **argv);
+void		do_export(char **argv);
+void		do_unset(char **argv);
+void		do_env(char **argv);
+void		do_exit(char **argv);
+char		*env_compose(char *key, char *value);
+void		load_environment(char **envp);
+void		cmd_distributor(char **argv);
+void		do_command(t_command *cmd);
+
+void		ft_puterr2(char *a, char *b);
+void		ft_puterr3(char *a, char *b, char *c);
 
 #endif
