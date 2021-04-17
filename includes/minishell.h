@@ -16,6 +16,8 @@ typedef enum e_token_type	t_token_type;
 
 typedef struct s_command	t_command;
 
+void	test(void); // TO RM
+
 /*** Tokenizer ****************************************************************/
 
 enum e_token_type
