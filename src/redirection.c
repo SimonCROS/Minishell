@@ -2,15 +2,19 @@
 
 void	redirect_out(t_command *cmd)
 {
-	int		out_fd;
-	int		pid;
+	int			out_fd;
+	int			pid;
+	t_iterator	it;
 
 	if (lst_is_empty(cmd->redirect_out))
 		return ;
-	pid = fork();
-	wait(NULL);
-	if (pid == 0)
-	{
+	it = iterator_new(cmd->redirect_out);
+	while (iterator_has_next(&it))
+		close(open(((t_entry *)iterator_next(&it))->value, O_WRONLY | O_CREAT));
+	// pid = fork();
+	// wait(NULL);
+	// if (pid == 0)
+	// {
 		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (out_fd == -1)
 		{
@@ -27,9 +31,9 @@ void	redirect_out(t_command *cmd)
 			ft_puterr2(">: ", strerror(errno));
 			return ;
 		}
-		cmd_distributor((char **)as_array(cmd->args));
-		exit(0);
-	}
+	// 	cmd_distributor((char **)as_array(cmd->args));
+	// 	exit(0);
+	// }
 }
 
 void	append(t_command *cmd)
@@ -39,10 +43,10 @@ void	append(t_command *cmd)
 
 	if (lst_is_empty(cmd->redirect_out))
 		return ;
-	pid = fork();
-	wait(NULL);
-	if (pid == 0)
-	{
+	// pid = fork();
+	// wait(NULL);
+	// if (pid == 0)
+	// {
 		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_APPEND, 0644);
 		if (out_fd == -1)
 		{
@@ -59,23 +63,23 @@ void	append(t_command *cmd)
 			ft_puterr2(">>: ", strerror(errno));
 			return ;
 		}
-		cmd_distributor((char **)as_array(cmd->args));
-		exit(0);
-	}
+	// 	cmd_distributor((char **)as_array(cmd->args));
+	// 	exit(0);
+	// }
 }
 
 void	redirect_in(t_command *cmd)
 {
-	int		in_fd;
-	int		pid;
+	int			in_fd;
+	int			pid;
 
 	if (lst_is_empty(cmd->redirect_in))
 		return ;
-	pid = fork();
-	wait(NULL);
-	if (pid == 0)
-	{
-		in_fd = open(lst_last(cmd->redirect_in), O_RDONLY);
+	// pid = fork();
+	// wait(NULL);
+	// if (pid == 0)
+	// {
+		in_fd = open(lst_first(cmd->redirect_in), O_RDONLY);
 		if (in_fd == -1)
 		{
 			ft_puterr2("<: ", strerror(errno));
@@ -91,9 +95,9 @@ void	redirect_in(t_command *cmd)
 			ft_puterr2("<: ", strerror(errno));
 			return ;
 		}
-		cmd_distributor((char **)as_array(cmd->args));
-		exit(0);
-	}
+	// 	cmd_distributor((char **)as_array(cmd->args));
+	// 	exit(0);
+	// }
 }
 
 void	piper(t_command *cmd)
@@ -133,20 +137,15 @@ void	piper(t_command *cmd)
 
 void	do_command(t_command *cmd)
 {
-	// t_list		*l;
-	// t_command	p;
+	int			pid;
 
-	// cmd->redirect_out = "test";
-	// redirect_out(cmd);
-
-	// cmd->redirect_in = "test";
-	// redirect_in(cmd);
-
-	// l = lst_new(NULL);
-	// lst_push(l, "tail");
-	// p.args = l;
-	// cmd->piper = &p;
-	// piper(cmd);
-
-	append(cmd);
+	pid = fork();
+	wait(NULL);
+	if (pid == 0)
+	{
+		redirect_in(cmd);
+		redirect_out(cmd);
+		cmd_distributor((char **)as_array(cmd->args));
+		exit(0);
+	}
 }

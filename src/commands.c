@@ -212,6 +212,8 @@ void	do_unset(char **argv)
 void	do_exit(char **argv)
 {
 	ft_putendl_fd("exit", 1);
+	if (argv == NULL)
+		exit(0);
 	if (argv[0] == NULL)
 		exit(g_global.cmd_ret);
 	else if (!strisnum(argv[0]))

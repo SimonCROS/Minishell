@@ -21,7 +21,7 @@ NAME		= minishell
 CC			= gcc
 RM			= rm -f
 
-CFLAGS		= -Wall -Wextra #-fsanitize=address # -Werror -g
+CFLAGS		= -Wall -Wextra -g #-fsanitize=address # -Werror -g
 INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 
 HEADERS		= includes/minishell.h

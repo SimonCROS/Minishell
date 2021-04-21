@@ -62,20 +62,22 @@ char	*tgetval(char *id)
 void	test_adel(void)
 {
 	int			pos;
-	int			count;
 	int			len;
-	t_list		*history;
+	t_dlist		*history;
+	t_dentry	*walker;
 	char		str[2000];
 	char		**line;
+	char		*cpy;
 	t_command	*cmd;
 
-	history = lst_new(free);
-	count = 0;
+	history = dlst_new(free);
 	*str = 0;
 	pos = 0;
 	tputs(keypad_xmit, 1, (int (*)(int))ft_putchar);
-	while (!ft_str_equals(str, CTRL_D))
+	while (TRUE)
 	{
+		cpy = NULL;
+		walker = history->first;
 		tputs(save_cursor, 1, (int (*)(int))ft_putchar);
 		line = str_new();
 		tcsetattr(0, TCSANOW, &g_global.term);
@@ -85,38 +87,63 @@ void	test_adel(void)
 			str[len] = 0;
 			if (ft_str_equals(str, key_up))
 			{
+				if (!cpy)
+					cpy = ft_strdup(*line);
+				free(*line);
+				*line = ft_strdup(walker->value);
+				walker = dlst_walk_right(walker);
 				tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
 				tputs(clr_eos, 1, (int (*)(int))ft_putchar);
-				free(*line);
-	 			*line = ft_strdup("");
+				ft_putstr(*line);
 			}
 			else if (ft_str_equals(str, key_down))
 			{
+				free(*line);
+				walker = dlst_walk_left(walker);
+				if (!walker)
+				{
+					*line = ft_strdup(cpy);
+					walker = history->first;
+				}
+				else 
+					*line = ft_strdup(walker->value);
 				tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
 				tputs(clr_eos, 1, (int (*)(int))ft_putchar);
-				free(*line);
-	 			*line = ft_strdup("");
+				ft_putstr(*line);
 			}
 			else if (ft_str_equals(str, (char[2]){ 127, 0 }) || ft_str_equals(str, key_backspace))
 			{
 				tputs(cursor_left, 1, (int (*)(int))ft_putchar);
 				tputs(delete_character, 1, (int (*)(int))ft_putchar);
 				line = str_rmlast(line);
+				if (pos > 0)
+					pos--;
 			}
 			else if (*str > 31 && *str < 127)
 			{
 				ft_putchar(*str);
 				str_cappend(line, *str);
+				pos++;
 			}
 			if (ft_str_equals(str, "\n") || ft_str_equals(str, CTRL_D))
 				break ;
 		}
+		if (ft_str_equals(str, CTRL_D))
+		{
+			if (str_is_empty(*line) && pos == 0)
+				do_exit(NULL);
+			continue ;
+		}
+		pos = 0;
 		ft_putchar('\n');
+		free(cpy);
+		if (!ft_str_equals(*line, "\n"))
+			dlst_unshift(history, *line);
 		tcsetattr(0, TCSANOW, &g_global.save);
 		cmd = lst_first(parse_line(*line));
 		free(*line);
 		if (cmd)
-			cmd_distributor((char **)as_array(cmd->args));
+			do_command(cmd);
 		free(line);
 	}
 	// while (ft_strcmp(str, CTRL_D))
