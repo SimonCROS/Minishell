@@ -137,15 +137,16 @@ void	piper(t_command *cmd)
 
 void	do_command(t_command *cmd)
 {
-	int			pid;
+	// int			pid;
 
-	pid = fork();
-	wait(NULL);
-	if (pid == 0)
-	{
-		redirect_in(cmd);
-		redirect_out(cmd);
-		cmd_distributor((char **)as_array(cmd->args));
-		exit(0);
-	}
+	// pid = fork();
+	// wait(NULL);
+	// if (pid == 0)
+	// {
+	// 	redirect_in(cmd);
+	// 	redirect_out(cmd);
+	// 	cmd_distributor((char **)as_array(cmd->args));
+	// 	exit(0);
+	// }
+	cmd_distributor((char **)as_array(cmd->args));
 }

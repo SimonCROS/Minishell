@@ -77,7 +77,7 @@ void	test_adel(void)
 	while (TRUE)
 	{
 		cpy = NULL;
-		walker = history->first;
+		walker = NULL;
 		tputs(save_cursor, 1, (int (*)(int))ft_putchar);
 		line = str_new();
 		tcsetattr(0, TCSANOW, &g_global.term);
@@ -89,27 +89,39 @@ void	test_adel(void)
 			{
 				if (!cpy)
 					cpy = ft_strdup(*line);
-				free(*line);
-				*line = ft_strdup(walker->value);
 				walker = dlst_walk_right(walker);
+				if (!walker)
+					walker = history->first;
+				if (walker)
+				{
+					free(*line);
+					*line = ft_strdup(walker->value);
+				}
 				tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
 				tputs(clr_eos, 1, (int (*)(int))ft_putchar);
 				ft_putstr(*line);
+				pos = ft_strlen(*line);
 			}
 			else if (ft_str_equals(str, key_down))
 			{
-				free(*line);
 				walker = dlst_walk_left(walker);
 				if (!walker)
 				{
-					*line = ft_strdup(cpy);
-					walker = history->first;
+					if (cpy)
+					{
+						free(*line);
+						*line = ft_strdup(cpy);
+					}
 				}
-				else 
+				else
+				{
+					free(*line);
 					*line = ft_strdup(walker->value);
+				}
 				tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
 				tputs(clr_eos, 1, (int (*)(int))ft_putchar);
 				ft_putstr(*line);
+				pos = ft_strlen(*line);
 			}
 			else if (ft_str_equals(str, (char[2]){ 127, 0 }) || ft_str_equals(str, key_backspace))
 			{
@@ -125,7 +137,7 @@ void	test_adel(void)
 				str_cappend(line, *str);
 				pos++;
 			}
-			if (ft_str_equals(str, "\n") || ft_str_equals(str, CTRL_D))
+			if (ft_str_equals(str, "\n") || (ft_str_equals(str, CTRL_D) && !pos))
 				break ;
 		}
 		if (ft_str_equals(str, CTRL_D))
@@ -137,13 +149,13 @@ void	test_adel(void)
 		pos = 0;
 		ft_putchar('\n');
 		free(cpy);
-		if (!ft_str_equals(*line, "\n"))
-			dlst_unshift(history, *line);
+		if (!str_is_empty(*line))
+			dlst_unshift(history, ft_strdup(*line));
 		tcsetattr(0, TCSANOW, &g_global.save);
 		cmd = lst_first(parse_line(*line));
-		free(*line);
 		if (cmd)
 			do_command(cmd);
+		free(*line);
 		free(line);
 	}
 	// while (ft_strcmp(str, CTRL_D))
