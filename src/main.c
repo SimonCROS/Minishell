@@ -78,6 +78,7 @@ void	test_adel(void)
 	{
 		cpy = NULL;
 		walker = NULL;
+		ft_putstr("\033[32mMinishell> \033[0m");
 		tputs(save_cursor, 1, (int (*)(int))ft_putchar);
 		line = str_new();
 		tcsetattr(0, TCSANOW, &g_global.term);
@@ -111,7 +112,11 @@ void	test_adel(void)
 					{
 						free(*line);
 						*line = ft_strdup(cpy);
+						free(cpy);
+						cpy = NULL;
 					}
+					else
+						tputs(bell, 1, (int (*)(int))ft_putchar);
 				}
 				else
 				{
@@ -123,7 +128,7 @@ void	test_adel(void)
 				ft_putstr(*line);
 				pos = ft_strlen(*line);
 			}
-			else if (ft_str_equals(str, (char[2]){ 127, 0 }) || ft_str_equals(str, key_backspace))
+			else if (pos && (ft_str_equals(str, (char[2]){ 127, 0 }) || ft_str_equals(str, key_backspace)))
 			{
 				tputs(cursor_left, 1, (int (*)(int))ft_putchar);
 				tputs(delete_character, 1, (int (*)(int))ft_putchar);
@@ -139,6 +144,8 @@ void	test_adel(void)
 			}
 			if (ft_str_equals(str, "\n") || (ft_str_equals(str, CTRL_D) && !pos))
 				break ;
+			if (ft_str_equals(str, CTRL_D))
+				tputs(bell, 1, (int (*)(int))ft_putchar);
 		}
 		if (ft_str_equals(str, CTRL_D))
 		{
@@ -155,68 +162,10 @@ void	test_adel(void)
 		cmd = lst_first(parse_line(*line));
 		if (cmd)
 			do_command(cmd);
+		lst_clear(cmd->args);
 		free(*line);
 		free(line);
 	}
-	// while (ft_strcmp(str, CTRL_D))
-	// {
-	// 	line = str_new();
-	// 	tcsetattr(0, TCSANOW, &global.shell.term);
-	// 	curr = count;
-	// 	while (1)
-	// 	{
-	// 		len = read(1, str, 100);
-	// 		str[len] = 0;
-	// 		if (ft_str_equals(str, "\e[A"))
-	// 		{
-	// 			tputs(tgetstr("dl", NULL), 1, (int (*)(int))ft_putchar);
-	// 			tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
-	// 			free(*line);
-	// 			*line = ft_strdup("");
-	// 			lst_get(history, curr);
-	// 		}
-	// 		else if (ft_str_equals(str, "\e[B"))
-	// 		{
-	// 			tputs(tgetstr("dl", NULL), 1, (int (*)(int))ft_putchar);
-	// 			tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
-	// 			free(*line);
-	// 			*line = ft_strdup("");
-	// 		}
-	// 		else if (*str == 127 && *(str + 1) == 0)
-	// 		{
-	// 			tputs(tgetstr("le", NULL), 1, (int (*)(int))ft_putchar);
-	// 			tputs(tgetstr("dc", NULL), 1, (int (*)(int))ft_putchar);
-	// 			line = str_rmlast(line);
-	// 		}
-	// 		else if (*str > 31 && *str < 127)
-	// 		{
-	// 			ft_putchar(*str);
-	// 			str_cappend(line, *str);
-	// 		}
-	// 		if (!ft_strcmp(str, "\n") || !ft_strcmp(str, CTRL_D))
-	// 			break ;
-	// 	}
-	// 	ft_putchar('\n');
-	// 	if (!ft_str_equals(*line, "\n"))
-	// 	{
-	// 		lst_push(history, *line);
-	// 		count++;
-	// 	}
-	// 	tcsetattr(0, TCSANOW, &global.shell.save);
-	// 	cmd.args = as_listf((void **)ft_split(*line, ' '), free);
-	// 	free(*line);
-	// 	cmd_distributor((char **)as_array(cmd.args));
-	// 	lst_destroy(cmd.args);
-	// 	free(line);
-	// }
-	// while (1)
-	// {
-	// 	get_next_line(0, &buffer);
-	// 	cmd.args = as_listf((void **)ft_split(buffer, ' '), free);
-	// 	// do_command(&cmd);
-	// 	cmd_distributor(as_array(cmd.args));
-	// 	lst_destroy(cmd.args);
-	// }
 }
 
 int	main(int argc, char *argv[], char *envp[])
@@ -228,5 +177,3 @@ int	main(int argc, char *argv[], char *envp[])
 	test_adel();
 	return (0);
 }
-
-// a"b'c'd"e'f"g"h'i|<>\|\<\>&&\&\&;\;
