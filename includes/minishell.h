@@ -86,6 +86,7 @@ struct s_global
 struct s_command
 {
 	t_list			*args;
+	int				append;
 	t_list			*redirect_in;
 	t_list			*redirect_out;
 	t_token_type	parent_relation;
