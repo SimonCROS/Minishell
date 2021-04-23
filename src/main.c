@@ -172,6 +172,8 @@ int	main(int argc, char *argv[], char *envp[])
 {
 	(void)argc;
 	(void)argv;
+	g_global.fd[0] = dup(0);
+	g_global.fd[1] = dup(1);
 	load_environment(envp);
 	term_load();
 	test_adel();

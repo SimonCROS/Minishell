@@ -326,9 +326,9 @@ t_list	*parse_line(char *line)
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
 		printf("\033[32mAh !\033[0m\n");
 
-	lst_foreach(tokens, (t_con)printtoken);
-	printf("---------------\n");
-	lst_foreach(commands, (t_con)printcommand);
+	// lst_foreach(tokens, (t_con)printtoken);
+	// printf("---------------\n");
+	// lst_foreach(commands, (t_con)printcommand);
 
 	lst_destroy(tokens);
 	return (commands);

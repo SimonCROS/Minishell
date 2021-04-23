@@ -79,6 +79,7 @@ struct s_global
 	int				cmd_ret;
 	struct termios	term;
 	struct termios	save;
+	int				fd[2];
 };
 
 /*** Commands *****************************************************************/

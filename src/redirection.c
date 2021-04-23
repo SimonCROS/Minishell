@@ -3,43 +3,43 @@
 void	redirect_out(t_command *cmd)
 {
 	int			out_fd;
-	int			pid;
-	t_iterator	it;
+	t_entry		*walk;
 
 	if (lst_is_empty(cmd->redirect_out))
 		return ;
-	it = iterator_new(cmd->redirect_out);
-	while (iterator_has_next(&it))
-		close(open(((t_entry *)iterator_next(&it))->value, O_WRONLY | O_CREAT));
-	// pid = fork();
-	// wait(NULL);
-	// if (pid == 0)
-	// {
+	walk = cmd->redirect_out->first;
+	while (walk)
+	{
+		if (walk->next)
+			close(open(walk->value, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+		walk = walk->next;
+	}
+	
+	if (cmd->append)
+		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
 		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (out_fd == -1)
-		{
-			ft_puterr2(">: ", strerror(errno));
-			return ;
-		}
-		if (dup2(out_fd, 1) == -1)
-		{
-			ft_puterr2(">: ", strerror(errno));
-			return ;
-		}
-		if (close(out_fd) == -1)
-		{
-			ft_puterr2(">: ", strerror(errno));
-			return ;
-		}
-	// 	cmd_distributor((char **)as_array(cmd->args));
-	// 	exit(0);
-	// }
+	if (out_fd == -1)
+	{
+		ft_puterr2(">: ", strerror(errno));
+		return ;
+	}
+	if (dup2(out_fd, 1) == -1)
+	{
+		ft_puterr2(">: ", strerror(errno));
+		return ;
+	}
+	if (close(out_fd) == -1)
+	{
+		ft_puterr2(">: ", strerror(errno));
+		return ;
+	}
 }
 
 void	append(t_command *cmd)
 {
 	int		out_fd;
-	int		pid;
+	// int		pid;
 
 	if (lst_is_empty(cmd->redirect_out))
 		return ;
@@ -71,7 +71,7 @@ void	append(t_command *cmd)
 void	redirect_in(t_command *cmd)
 {
 	int			in_fd;
-	int			pid;
+	// int			pid;
 
 	if (lst_is_empty(cmd->redirect_in))
 		return ;
@@ -137,16 +137,9 @@ void	piper(t_command *cmd)
 
 void	do_command(t_command *cmd)
 {
-	// int			pid;
-
-	// pid = fork();
-	// wait(NULL);
-	// if (pid == 0)
-	// {
-	// 	redirect_in(cmd);
-	// 	redirect_out(cmd);
-	// 	cmd_distributor((char **)as_array(cmd->args));
-	// 	exit(0);
-	// }
+	redirect_in(cmd);
+	redirect_out(cmd);
 	cmd_distributor((char **)as_array(cmd->args));
+	dup2(g_global.fd[0], 0);
+	dup2(g_global.fd[1], 1);
 }
