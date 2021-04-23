@@ -119,65 +119,6 @@ void	test_adel(void)
 			cmd_distributor((char **)as_array(cmd->args));
 		free(line);
 	}
-	// while (ft_strcmp(str, CTRL_D))
-	// {
-	// 	line = str_new();
-	// 	tcsetattr(0, TCSANOW, &global.shell.term);
-	// 	curr = count;
-	// 	while (1)
-	// 	{
-	// 		len = read(1, str, 100);
-	// 		str[len] = 0;
-	// 		if (ft_str_equals(str, "\e[A"))
-	// 		{
-	// 			tputs(tgetstr("dl", NULL), 1, (int (*)(int))ft_putchar);
-	// 			tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
-	// 			free(*line);
-	// 			*line = ft_strdup("");
-	// 			lst_get(history, curr);
-	// 		}
-	// 		else if (ft_str_equals(str, "\e[B"))
-	// 		{
-	// 			tputs(tgetstr("dl", NULL), 1, (int (*)(int))ft_putchar);
-	// 			tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
-	// 			free(*line);
-	// 			*line = ft_strdup("");
-	// 		}
-	// 		else if (*str == 127 && *(str + 1) == 0)
-	// 		{
-	// 			tputs(tgetstr("le", NULL), 1, (int (*)(int))ft_putchar);
-	// 			tputs(tgetstr("dc", NULL), 1, (int (*)(int))ft_putchar);
-	// 			line = str_rmlast(line);
-	// 		}
-	// 		else if (*str > 31 && *str < 127)
-	// 		{
-	// 			ft_putchar(*str);
-	// 			str_cappend(line, *str);
-	// 		}
-	// 		if (!ft_strcmp(str, "\n") || !ft_strcmp(str, CTRL_D))
-	// 			break ;
-	// 	}
-	// 	ft_putchar('\n');
-	// 	if (!ft_str_equals(*line, "\n"))
-	// 	{
-	// 		lst_push(history, *line);
-	// 		count++;
-	// 	}
-	// 	tcsetattr(0, TCSANOW, &global.shell.save);
-	// 	cmd.args = as_listf((void **)ft_split(*line, ' '), free);
-	// 	free(*line);
-	// 	cmd_distributor((char **)as_array(cmd.args));
-	// 	lst_destroy(cmd.args);
-	// 	free(line);
-	// }
-	// while (1)
-	// {
-	// 	get_next_line(0, &buffer);
-	// 	cmd.args = as_listf((void **)ft_split(buffer, ' '), free);
-	// 	// do_command(&cmd);
-	// 	cmd_distributor(as_array(cmd.args));
-	// 	lst_destroy(cmd.args);
-	// }
 }
 
 int	main(int argc, char *argv[], char *envp[])

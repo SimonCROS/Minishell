@@ -11,6 +11,19 @@ void	printcommand(t_command *command)
 {
 	lst_foreach(command->args, (t_con)print);
 	printf("\n");
+	if (command->redirect_out->size)
+	{
+		printf("> ");
+		lst_foreach(command->redirect_out, (t_con)print);
+		printf("(%s)", command->append ? "append" : "replace");
+		printf("\n");
+	}
+	if (command->redirect_in->size)
+	{
+		printf("< ");
+		lst_foreach(command->redirect_in, (t_con)print);
+		printf("\n");
+	}
 }
 
 void	printtoken(t_token *token)
@@ -70,7 +83,11 @@ void	free_token(t_token *token)
 void	free_command(t_command *command)
 {
 	if (command)
+	{
 		lst_destroy(command->args);
+		lst_destroy(command->redirect_out);
+		lst_destroy(command->redirect_in);
+	}
 	free(command);
 }
 
@@ -123,8 +140,8 @@ t_command	*new_command(t_list *commands, t_token_type parent_relation)
 		free_command(command);
 		return (NULL);
 	}
-	command->redirect_in = NULL;
-	command->redirect_out = NULL;
+	command->redirect_in = lst_new(free);
+	command->redirect_out = lst_new(free);
 	command->parent_relation = parent_relation;
 	if (!commands)
 		return (command);
@@ -249,10 +266,12 @@ int	parse(t_list *commands, t_list *tokens)
 	t_command	*command;
 	t_iterator	tokens_iterator;
 	int			space;
+	t_list		*lst;
 
 	prev = NULL;
 	space = 0;
 	command = new_command(commands, T_LAZY_AND);
+	lst = command->args;
 	tokens_iterator = iterator_new(tokens);
 	argument = NULL;
 	while (iterator_has_next(&tokens_iterator))
@@ -269,21 +288,30 @@ int	parse(t_list *commands, t_list *tokens)
 			return (FALSE);
 		else if (current->separator && prev->separator)
 			return (FALSE);
-		if ((current->separator || space) && argument)
+		if ((current->separator || current->token_type == T_REDIRECT_IN || current->token_type == T_REDIRECT_OUT || space) && argument)
 		{
-			lst_push(command->args, argument);
+			lst_push(lst, argument);
 			argument = NULL;
+			lst = command->args;
+			if (current->token_type == T_REDIRECT_OUT)
+				command->append = ft_strlen(*(current->buffer)) == 2;
 		}
+		if (current->token_type == T_REDIRECT_OUT)
+			lst = command->redirect_out;
+		if (current->token_type == T_REDIRECT_IN)
+			lst = command->redirect_in;
 		if (current->separator)
 			command = new_command(commands, current->token_type);
-		else
+		else if (current->token_type != T_REDIRECT_OUT && current->token_type != T_REDIRECT_IN)
 			if (!parse_token(&argument, current))
 				return (FALSE);
 		prev = current;
 		space = 0;
 	}
 	if (argument)
-		lst_push(command->args, argument);
+		lst_push(lst, argument);
+	if (prev && (prev->token_type == T_REDIRECT_IN || prev->token_type == T_REDIRECT_OUT))
+		return (FALSE);
 	return (TRUE);
 }
 
@@ -298,9 +326,9 @@ t_list	*parse_line(char *line)
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
 		printf("\033[32mAh !\033[0m\n");
 
-	// lst_foreach(tokens, (t_con)printtoken);
-	// printf("---------------\n");
-	// lst_foreach(commands, (t_con)printcommand);
+	lst_foreach(tokens, (t_con)printtoken);
+	printf("---------------\n");
+	lst_foreach(commands, (t_con)printcommand);
 
 	lst_destroy(tokens);
 	return (commands);
