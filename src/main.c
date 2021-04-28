@@ -61,16 +61,20 @@ char	*tgetval(char *id)
 
 void	test_adel(void)
 {
-	int			pos;
-	int			len;
-	t_dlist		*history;
-	t_dentry	*walker;
-	char		str[2000];
-	char		**line;
-	char		*cpy;
-	t_command	*cmd;
+	int				i;
+	int				pos;
+	int				len;
+	t_dlist			*history;
+	t_dentry		*walker;
+	char			str[2000];
+	char			**line;
+	char			*cpy;
+	t_command		*cmd;
+	struct winsize	w;
 
 	history = dlst_new(free);
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	
 	*str = 0;
 	pos = 0;
 	tputs(keypad_xmit, 1, (int (*)(int))ft_putchar);
@@ -99,6 +103,11 @@ void	test_adel(void)
 					*line = ft_strdup(walker->value);
 				}
 				tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
+				// while (pos + 11 > w.ws_col)
+				// {
+				// 	tputs(cursor_up, 1, (int (*)(int))ft_putchar);
+				// 	pos -= w.ws_col;
+				// }
 				tputs(clr_eos, 1, (int (*)(int))ft_putchar);
 				ft_putstr(*line);
 				pos = ft_strlen(*line);
@@ -130,6 +139,14 @@ void	test_adel(void)
 			}
 			else if (pos && (ft_str_equals(str, (char[2]){ 127, 0 }) || ft_str_equals(str, key_backspace)))
 			{
+				// if ((pos + 11) % w.ws_col == 0)
+				// {
+				// 	tputs(cursor_up, 1, (int (*)(int))ft_putchar);
+				// 	i = -1;
+				// 	while (++i < w.ws_col)
+				// 		tputs(cursor_right, 1, (int (*)(int))ft_putchar);
+				// 	continue ;
+				// }
 				tputs(cursor_left, 1, (int (*)(int))ft_putchar);
 				tputs(delete_character, 1, (int (*)(int))ft_putchar);
 				line = str_rmlast(line);

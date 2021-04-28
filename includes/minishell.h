@@ -10,6 +10,7 @@
 # include <termios.h>
 # include <sys/stat.h>
 # include <sys/errno.h>
+# include <sys/ioctl.h>
 # include <sys/param.h>
 
 /*** Types ********************************************************************/

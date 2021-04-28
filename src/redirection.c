@@ -36,38 +36,6 @@ void	redirect_out(t_command *cmd)
 	}
 }
 
-void	append(t_command *cmd)
-{
-	int		out_fd;
-	// int		pid;
-
-	if (lst_is_empty(cmd->redirect_out))
-		return ;
-	// pid = fork();
-	// wait(NULL);
-	// if (pid == 0)
-	// {
-		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_APPEND, 0644);
-		if (out_fd == -1)
-		{
-			ft_puterr2(">>: ", strerror(errno));
-			return ;
-		}
-		if (dup2(out_fd, 1) == -1)
-		{
-			ft_puterr2(">>: ", strerror(errno));
-			return ;
-		}
-		if (close(out_fd) == -1)
-		{
-			ft_puterr2(">>: ", strerror(errno));
-			return ;
-		}
-	// 	cmd_distributor((char **)as_array(cmd->args));
-	// 	exit(0);
-	// }
-}
-
 void	redirect_in(t_command *cmd)
 {
 	int			in_fd;
@@ -79,7 +47,7 @@ void	redirect_in(t_command *cmd)
 	// wait(NULL);
 	// if (pid == 0)
 	// {
-		in_fd = open(lst_first(cmd->redirect_in), O_RDONLY);
+		in_fd = open(lst_last(cmd->redirect_in), O_RDONLY);
 		if (in_fd == -1)
 		{
 			ft_puterr2("<: ", strerror(errno));
