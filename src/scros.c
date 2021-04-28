@@ -301,7 +301,10 @@ int	parse(t_list *commands, t_list *tokens)
 		if (current->token_type == T_REDIRECT_IN)
 			lst = command->redirect_in;
 		if (current->separator)
+		{
 			command = new_command(commands, current->token_type);
+			lst = command->args;
+		}
 		else if (current->token_type != T_REDIRECT_OUT && current->token_type != T_REDIRECT_IN)
 			if (!parse_token(&argument, current))
 				return (FALSE);
