@@ -332,12 +332,12 @@ t_list	*parse_line(char *line)
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
 		lst_clear(commands);
 
-	lst_foreach(tokens, (t_con)printtoken);
-	if (commands->size != 0)
-	{
-		printf("---------------\n");
-		lst_foreach(commands, (t_con)printcommand);
-	}
+	// lst_foreach(tokens, (t_con)printtoken);
+	// if (commands->size != 0)
+	// {
+	// 	printf("---------------\n");
+	// 	lst_foreach(commands, (t_con)printcommand);
+	// }
 
 	lst_destroy(tokens);
 	return (commands);

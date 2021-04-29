@@ -65,7 +65,9 @@ void	term_resize(int sig)
 	{
     	ioctl(STDOUT_FILENO, TIOCGWINSZ, &g_global.wnsze);
 		tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
+		tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
 		tputs(clr_eos, 1, (int (*)(int))ft_putchar);
+		ft_putstr("\033[32mMinishell> \033[0m");
 		ft_putstr(*g_global.line);
 	}
 }
