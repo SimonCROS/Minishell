@@ -61,7 +61,7 @@ int	redirect_in(t_command *cmd)
 	return (TRUE);
 }
 
-void	piper(t_command *cmd)
+void	piper(t_command *cmd, t_iterator *it)
 {
 	int	fd[2];
 	int	pid;
@@ -81,7 +81,11 @@ void	piper(t_command *cmd)
 			return ;
 		}
 		close(fd[1]);
-		cmd_distributor((char **)as_array(cmd->args));
+		cmd = iterator_next(it);
+		if (cmd->next_relation == T_PIPE)
+			piper(cmd, it);
+		else
+			do_redirect(cmd);
 	}
 	else
 	{
@@ -91,14 +95,14 @@ void	piper(t_command *cmd)
 			return ;
 		}
 		close(fd[0]);
-		cmd_distributor((char **)as_array(cmd->args));
+		do_redirect(cmd);
 		exit(0);
 	}
 }
 
-int		do_command(t_command *cmd)
+int		do_redirect(t_command *cmd)
 {
-	if (redirect_in(cmd) && redirect_out(cmd))
+	if (redirect_in(cmd) || redirect_out(cmd))
 		return (FALSE);
 	cmd_distributor((char **)as_array(cmd->args));
 	dup2(g_global.fd[0], 0);
@@ -106,4 +110,20 @@ int		do_command(t_command *cmd)
 	if (g_global.cmd_ret)
 		return (FALSE);
 	return (TRUE);
+}
+
+void	do_command(t_list *cmds)
+{
+	t_iterator	it;
+	t_command	*cmd;
+
+	it = iterator_new(cmds);
+	while (iterator_has_next(&it))
+	{
+		cmd = iterator_next(&it);
+		if (cmd->next_relation == T_PIPE)
+			piper(cmd, &it);
+		else
+			do_redirect(cmd);
+	}
 }

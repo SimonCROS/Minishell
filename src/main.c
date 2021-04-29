@@ -80,8 +80,6 @@ void	test_adel(void)
 	t_dentry		*walker;
 	char			str[2000];
 	char			*cpy;
-	t_iterator		it;
-	t_command		*cmd;
 	t_list			*cmds;
 
 	history = dlst_new(free);
@@ -190,13 +188,7 @@ void	test_adel(void)
 		cmds = parse_line(*g_global.line);
 		if (!cmds)
 			return ;
-		it = iterator_new(cmds);
-		while (iterator_has_next(&it))
-		{
-			cmd = iterator_next(&it);
-			if (!do_command(cmd))
-				break ;
-		}
+		do_command(cmds);
 		lst_destroy(cmds);
 		free(*g_global.line);
 		free(g_global.line);

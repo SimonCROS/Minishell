@@ -113,7 +113,8 @@ void		do_exit(char **argv);
 char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
 void		cmd_distributor(char **argv);
-int			do_command(t_command *cmd);
+void		do_command(t_list *cmds);
+int			do_redirect(t_command *cmd);
 
 void		ft_puterr2(char *a, char *b);
 void		ft_puterr3(char *a, char *b, char *c);
