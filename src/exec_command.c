@@ -15,8 +15,15 @@ char	**get_env_path(char *path)
 	char	*tmp;
 	char	*val;
 
-	new_path = ft_strjoin("/", path);
 	val = map_get(g_global.env, "PATH");
+	if (!val)
+	{
+		errno = 2;
+		ft_puterr4("minish: ", path, ": ", strerror(errno));
+		g_global.cmd_ret = errno;
+		return (NULL);
+	}
+	new_path = ft_strjoin("/", path);
 	env_path = ft_split(val, ':');
 	i = -1;
 	while (env_path[++i])
@@ -91,6 +98,8 @@ void	do_execute(char *path, char **argv)
 		return ;
 	}
 	env_path = get_env_path(path);
+	if (!env_path)
+		return ;
 	i = -1;
 	while (env_path[++i])
 		if (file_exists(env_path[i]))

@@ -81,6 +81,8 @@ struct s_global
 	struct termios	term;
 	struct termios	save;
 	int				fd[2];
+	struct winsize	wnsze;
+	char			**line;
 };
 
 /*** Commands *****************************************************************/
@@ -111,9 +113,10 @@ void		do_exit(char **argv);
 char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
 void		cmd_distributor(char **argv);
-void		do_command(t_command *cmd);
+int			do_command(t_command *cmd);
 
 void		ft_puterr2(char *a, char *b);
 void		ft_puterr3(char *a, char *b, char *c);
+void		ft_puterr4(char *a, char *b, char *c, char *d);
 
 #endif
