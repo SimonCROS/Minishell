@@ -127,7 +127,7 @@ t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 	return (token);
 }
 
-t_command	*new_command(t_list *commands, t_token_type parent_relation)
+t_command	*new_command(t_list *commands)
 {
 	t_command	*command;
 
@@ -142,7 +142,7 @@ t_command	*new_command(t_list *commands, t_token_type parent_relation)
 	}
 	command->redirect_in = lst_new(free);
 	command->redirect_out = lst_new(free);
-	command->parent_relation = parent_relation;
+	command->next_relation = T_NONE;
 	if (!commands)
 		return (command);
 	if (!lst_push(commands, command))
@@ -270,7 +270,7 @@ int	parse(t_list *commands, t_list *tokens)
 
 	prev = NULL;
 	space = 0;
-	command = new_command(commands, T_LAZY_AND);
+	command = new_command(commands);
 	lst = command->args;
 	tokens_iterator = iterator_new(tokens);
 	argument = NULL;
@@ -283,7 +283,10 @@ int	parse(t_list *commands, t_list *tokens)
 			continue ;
 		}
 		if (!is_valid(current))
+		{
+			ft_puterr3("minish: syntax error near unexpected token `", *(current->buffer), "'");
 			return (FALSE);
+		}
 		else if (current->separator && !prev)
 			return (FALSE);
 		else if (current->separator && prev->separator)
@@ -302,8 +305,8 @@ int	parse(t_list *commands, t_list *tokens)
 			lst = command->redirect_in;
 		if (current->separator)
 		{
-			command = new_command(commands, current->token_type);
-			lst = command->args;
+			command->next_relation = current->token_type;
+			command = new_command(commands);
 		}
 		else if (current->token_type != T_REDIRECT_OUT && current->token_type != T_REDIRECT_IN)
 			if (!parse_token(&argument, current))
@@ -327,11 +330,14 @@ t_list	*parse_line(char *line)
 	commands = lst_new((t_con)free_command);
 
 	if (!tokenize(tokens, line) || !parse(commands, tokens))
-		printf("\033[32mAh !\033[0m\n");
+		lst_clear(commands);
 
-	// lst_foreach(tokens, (t_con)printtoken);
-	// printf("---------------\n");
-	// lst_foreach(commands, (t_con)printcommand);
+	lst_foreach(tokens, (t_con)printtoken);
+	if (commands->size != 0)
+	{
+		printf("---------------\n");
+		lst_foreach(commands, (t_con)printcommand);
+	}
 
 	lst_destroy(tokens);
 	return (commands);

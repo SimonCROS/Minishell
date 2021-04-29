@@ -93,7 +93,7 @@ struct s_command
 	int				append;
 	t_list			*redirect_in;
 	t_list			*redirect_out;
-	t_token_type	parent_relation;
+	t_token_type	next_relation;
 };
 
 char		**ft_split_first(char *s, char c);
