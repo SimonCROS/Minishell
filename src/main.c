@@ -30,7 +30,7 @@ void	term_load(void)
 		term_name = map_get(g_global.env, "TERM");
 	else
 	{
-		ft_putendl_fd("Impossible to determine the terminal\n", 2);
+		ft_putendl_fd("minishell: Impossible to determine the terminal\n", 2);
 		exit(1);
 	}
 	if (tcgetattr(0, &g_global.term) == ERROR || tcgetattr(0, &g_global.save) == ERROR)
@@ -67,12 +67,12 @@ void	term_resize(int sig)
 		tputs(restore_cursor, 1, (int (*)(int))ft_putchar);
 		tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
 		tputs(clr_eos, 1, (int (*)(int))ft_putchar);
-		ft_putstr("\033[32mMinishell> \033[0m");
+		ft_putstr(PROMPT);
 		ft_putstr(*g_global.line);
 	}
 }
 
-void	test_adel(void)
+void	test_adel(int prompt_size)
 {
 	int				pos;
 	int				len;
@@ -80,9 +80,11 @@ void	test_adel(void)
 	t_dentry		*walker;
 	char			str[2000];
 	char			*cpy;
+	char			*clear;
 	t_list			*cmds;
 
 	history = dlst_new(free);
+	clear = "clear";
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &g_global.wnsze);
 	*str = 0;
 	pos = 0;
@@ -91,7 +93,7 @@ void	test_adel(void)
 	{
 		cpy = NULL;
 		walker = NULL;
-		ft_putstr("minishell> ");
+		ft_putstr(PROMPT);
 		tputs(save_cursor, 1, (int (*)(int))ft_putchar);
 		g_global.line = str_new();
 		tcsetattr(0, TCSANOW, &g_global.term);
@@ -144,7 +146,7 @@ void	test_adel(void)
 			}
 			else if (pos && (ft_str_equals(str, "\177") || ft_str_equals(str, key_backspace)))
 			{
-				if ((pos + 11) % g_global.wnsze.ws_col == 0)
+				if ((pos + prompt_size) % g_global.wnsze.ws_col == 0)
 				{
 					tputs(cursor_up, 1, (int (*)(int))ft_putchar);
 					tputs(tgoto(tgetstr("ch", NULL), 0, g_global.wnsze.ws_col - 1), 1, (int (*)(int))ft_putchar);
@@ -161,12 +163,17 @@ void	test_adel(void)
 			{
 				ft_putchar(*str);
 				str_cappend(g_global.line, *str);
-				if ((pos + 11) % g_global.wnsze.ws_col == g_global.wnsze.ws_col - 1)
+				if ((pos + prompt_size) % g_global.wnsze.ws_col == g_global.wnsze.ws_col - 1)
 				{
 					tputs(cursor_down, 1, (int (*)(int))ft_putchar);
 					tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
 				}
 				pos++;
+			}
+			else if (*str == 12 && *(str + 1) == 0)
+			{
+				do_execute(clear, &clear);
+				ft_putstr(PROMPT);
 			}
 			if (ft_str_equals(str, "\n") || (ft_str_equals(str, CTRL_D) && !pos))
 				break ;
@@ -197,13 +204,16 @@ void	test_adel(void)
 
 int	main(int argc, char *argv[], char *envp[])
 {
+	int		prompt_size;
+
 	(void)argc;
 	(void)argv;
 	g_global.fd[0] = dup(0);
 	g_global.fd[1] = dup(1);
 	g_global.cmd_ret = 0;
+	prompt_size = ft_strlen(PROMPT);
 	load_environment(envp);
 	term_load();
-	test_adel();
+	test_adel(prompt_size);
 	return (0);
 }

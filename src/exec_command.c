@@ -19,7 +19,7 @@ char	**get_env_path(char *path)
 	if (!val)
 	{
 		errno = 2;
-		ft_puterr4("minish: ", path, ": ", strerror(errno));
+		ft_puterr4("minishell: ", path, ": ", strerror(errno));
 		g_global.cmd_ret = errno;
 		return (NULL);
 	}
@@ -122,7 +122,7 @@ void	do_execute(char *path, char **argv)
 	}
 	else
 	{
-		ft_puterr2("minish: command not found: ", path);
+		ft_puterr2("minishell: command not found: ", path);
 		g_global.cmd_ret = errno;
 	}
 	i = -1;

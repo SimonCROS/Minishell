@@ -58,7 +58,7 @@ void	do_cd(char **argv)
 		home = map_get(g_global.env, "HOME");
 		if (home == NULL)
 		{
-			ft_putendl_fd("cd: HOME not set", 2);
+			ft_putendl_fd("minishell: cd: HOME not set", 2);
 			g_global.cmd_ret = NOT_SET;
 			return ;
 		}
@@ -68,7 +68,7 @@ void	do_cd(char **argv)
 	}
 	else if (argv[1] != NULL)
 	{
-		ft_putendl_fd("cd: too many arguments", 2);
+		ft_putendl_fd("minishell: cd: too many arguments", 2);
 		g_global.cmd_ret = TOO_MANY_ARGS;
 	}
 	else
@@ -89,7 +89,7 @@ void	do_pwd(char **argv)
 	g_global.cmd_ret = 0;
 	if (argv[0] != NULL)
 	{
-		ft_putendl_fd("pwd: too many arguments", 2);
+		ft_putendl_fd("minishell: pwd: too many arguments", 2);
 		g_global.cmd_ret = TOO_MANY_ARGS;
 		return ;
 	}
@@ -162,7 +162,7 @@ void	do_export(char **argv)
 		{
 			if (!check_export_arg(res->first->value))
 			{
-				ft_puterr3("export: '", res->first->value, "': not a valid identifier");
+				ft_puterr3("minishell: export: '", res->first->value, "': not a valid identifier");
 				g_global.cmd_ret = NOT_VALID;
 			}
 			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=' && map_contains_key(g_global.env, res->first->value))
@@ -190,7 +190,7 @@ void	do_env(char **argv)
 	g_global.cmd_ret = 0;
 	if (*argv != NULL)
 	{
-		ft_putendl_fd("env: too many arguments", 2);
+		ft_putendl_fd("minishell: env: too many arguments", 2);
 		g_global.cmd_ret = TOO_MANY_ARGS;
 		return ;
 	}
@@ -199,7 +199,11 @@ void	do_env(char **argv)
 	{
 		elem = citerator_next(&iter);
 		if (elem->value != NULL)
-			printf("%s=%s\n", elem->key, elem->value);
+		{
+			ft_putstr(elem->key);
+			ft_putchar('=');
+			ft_putendl(elem->value);
+		}
 	}
 }
 
@@ -224,7 +228,7 @@ void	do_unset(char **argv)
 	{
 		if (!check_export_arg(argv[i]))
 		{
-			ft_puterr3("export: '", argv[i], "': not a valid identifier");
+			ft_puterr3("minishell: export: '", argv[i], "': not a valid identifier");
 			g_global.cmd_ret = NOT_VALID;
 		}
 		else
@@ -244,12 +248,12 @@ void	do_exit(char **argv)
 		exit(g_global.cmd_ret);
 	else if (!strisnum(argv[0]))
 	{
-		ft_puterr3("exit: ", argv[0], ": numeric argument required");
+		ft_puterr3("minishell: exit: ", argv[0], ": numeric argument required");
 		exit(255);
 	}
 	else if (argv[0] != NULL && argv[1] != NULL)
 	{
-		ft_putendl_fd("exit: too many arguments", 2);
+		ft_putendl_fd("minishell: exit: too many arguments", 2);
 		g_global.cmd_ret = TOO_MANY_ARGS;
 		return ;
 	}

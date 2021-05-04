@@ -34,6 +34,7 @@ t_global					g_global;
 # define TOO_MANY_ARGS	-2
 # define NOT_VALID		-3
 # define NOT_SET		-4
+# define PROMPT			"minishell> "
 
 /*** Tokenizer ****************************************************************/
 
