@@ -7,25 +7,6 @@ void	print(char *str)
 	printf("|%s| ", str);
 }
 
-void	printcommand(t_command *command)
-{
-	lst_foreach(command->args, (t_con)print);
-	printf("\n");
-	if (command->redirect_out->size)
-	{
-		printf("> ");
-		lst_foreach(command->redirect_out, (t_con)print);
-		printf("(%s)", command->append ? "append" : "replace");
-		printf("\n");
-	}
-	if (command->redirect_in->size)
-	{
-		printf("< ");
-		lst_foreach(command->redirect_in, (t_con)print);
-		printf("\n");
-	}
-}
-
 void	printtoken(t_token *token)
 {
 	char	*token_name;
@@ -69,6 +50,33 @@ void	printtoken(t_token *token)
 		token_name, *(token->buffer));
 }
 
+void	printcommand(t_command *command)
+{
+	printf("---------------\n");
+	if (command->tokens->size)
+	{
+		lst_foreach(command->tokens, (t_con)printtoken);
+	}
+	if (command->args->size)
+	{
+		lst_foreach(command->args, (t_con)print);
+		printf("\n");
+	}
+	if (command->redirect_out->size)
+	{
+		printf("> ");
+		lst_foreach(command->redirect_out, (t_con)print);
+		printf("(%s)", command->append ? "append" : "replace");
+		printf("\n");
+	}
+	if (command->redirect_in->size)
+	{
+		printf("< ");
+		lst_foreach(command->redirect_in, (t_con)print);
+		printf("\n");
+	}
+}
+
 void	free_token(t_token *token)
 {
 	if (token)
@@ -84,6 +92,7 @@ void	free_command(t_command *command)
 {
 	if (command)
 	{
+		lst_destroy(command->tokens);
 		lst_destroy(command->args);
 		lst_destroy(command->redirect_out);
 		lst_destroy(command->redirect_in);
@@ -134,14 +143,15 @@ t_command	*new_command(t_list *commands)
 	command = malloc(sizeof(t_command));
 	if (!command)
 		return (NULL);
+	command->tokens = lst_new(free);
 	command->args = lst_new(free);
-	if (!command->args)
+	command->redirect_in = lst_new(free);
+	command->redirect_out = lst_new(free);
+	if (!command->tokens || !command->args || !command->redirect_in || !command->redirect_out)
 	{
 		free_command(command);
 		return (NULL);
 	}
-	command->redirect_in = lst_new(free);
-	command->redirect_out = lst_new(free);
 	command->next_relation = T_NONE;
 	if (!commands)
 		return (command);
@@ -258,21 +268,63 @@ int	parse_token(char **container, t_token *token)
 	return (TRUE);
 }
 
-int	parse(t_list *commands, t_list *tokens)
+int	validate(t_list *commands, t_list *tokens)
 {
 	char		*argument;
 	t_token		*prev;
 	t_token		*current;
 	t_command	*command;
+	int			space;
+	int			started;
+
+	started = 0;
+	prev = NULL;
+	space = 0;
+	command = new_command(commands);
+	argument = NULL;
+	current = (t_token *)lst_shift(tokens);
+	while (current || !started)
+	{
+		started = 1;
+		lst_push(command->tokens, current);
+		if (current->token_type == T_WHITESPACE)
+			space = 1;
+		else
+		{
+			if (!is_valid(current) || (current->separator && !prev) || (current->separator && prev->separator))
+			{
+				ft_puterr3("minish: syntax error near unexpected token `", *(current->buffer), "'");
+				return (FALSE);
+			}
+			if (current->separator)
+			{
+				command->next_relation = current->token_type;
+				command = new_command(commands);
+			}
+			prev = current;
+			space = 0;
+		}
+		current = (t_token *)lst_shift(tokens);
+	}
+	if (prev && (prev->token_type == T_REDIRECT_IN || prev->token_type == T_REDIRECT_OUT || prev->token_type == T_AND || prev->token_type == T_PIPE))
+	{
+		ft_putendl_fd("minish: syntax error: unexpected end of file", 2);
+		return (FALSE);
+	}
+	return (TRUE);
+}
+
+int	parse(t_command *command)
+{
+	char		*argument;
+	t_token		*current;
 	t_iterator	tokens_iterator;
 	int			space;
 	t_list		*lst;
 
-	prev = NULL;
 	space = 0;
-	command = new_command(commands);
 	lst = command->args;
-	tokens_iterator = iterator_new(tokens);
+	tokens_iterator = iterator_new(command->tokens);
 	argument = NULL;
 	while (iterator_has_next(&tokens_iterator))
 	{
@@ -282,15 +334,6 @@ int	parse(t_list *commands, t_list *tokens)
 			space = 1;
 			continue ;
 		}
-		if (!is_valid(current))
-		{
-			ft_puterr3("minish: syntax error near unexpected token `", *(current->buffer), "'");
-			return (FALSE);
-		}
-		else if (current->separator && !prev)
-			return (FALSE);
-		else if (current->separator && prev->separator)
-			return (FALSE);
 		if ((current->separator || current->token_type == T_REDIRECT_IN || current->token_type == T_REDIRECT_OUT || space) && argument)
 		{
 			lst_push(lst, argument);
@@ -301,23 +344,14 @@ int	parse(t_list *commands, t_list *tokens)
 		}
 		if (current->token_type == T_REDIRECT_OUT)
 			lst = command->redirect_out;
-		if (current->token_type == T_REDIRECT_IN)
+		else if (current->token_type == T_REDIRECT_IN)
 			lst = command->redirect_in;
-		if (current->separator)
-		{
-			command->next_relation = current->token_type;
-			command = new_command(commands);
-		}
-		else if (current->token_type != T_REDIRECT_OUT && current->token_type != T_REDIRECT_IN)
-			if (!parse_token(&argument, current))
-				return (FALSE);
-		prev = current;
+		else
+			parse_token(&argument, current);
 		space = 0;
 	}
 	if (argument)
 		lst_push(lst, argument);
-	if (prev && (prev->token_type == T_REDIRECT_IN || prev->token_type == T_REDIRECT_OUT))
-		return (FALSE);
 	return (TRUE);
 }
 
@@ -329,16 +363,16 @@ t_list	*parse_line(char *line)
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
 
-	if (!tokenize(tokens, line) || !parse(commands, tokens))
+	if (!tokenize(tokens, line) || !validate(commands, tokens))
 		lst_clear(commands);
 
-	// lst_foreach(tokens, (t_con)printtoken);
-	// if (commands->size != 0)
-	// {
-	// 	printf("---------------\n");
-	// 	lst_foreach(commands, (t_con)printcommand);
-	// }
+	lst_foreach(tokens, (t_con)printtoken);
+	lst_foreach(commands, (t_con)parse);
+	lst_foreach(commands, (t_con)printcommand);
 
 	lst_destroy(tokens);
+
+	lst_clear(commands);
+
 	return (commands);
 }

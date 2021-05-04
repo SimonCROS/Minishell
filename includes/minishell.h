@@ -90,6 +90,7 @@ struct s_global
 struct s_command
 {
 	t_list			*args;
+	t_list			*tokens;
 	int				append;
 	t_list			*redirect_in;
 	t_list			*redirect_out;
