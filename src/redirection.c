@@ -6,11 +6,13 @@ int	redirect_out(t_command *cmd)
 	t_entry		*walk;
 
 	if (lst_is_empty(cmd->redirect_out))
-		return (FALSE);
+		return (TRUE);
 	walk = cmd->redirect_out->first;
 	while (walk)
 	{
-		if (walk->next)
+		if (walk->next && cmd->append)
+			close(open(walk->value, O_WRONLY | O_CREAT | O_APPEND, 0644));
+		else if (walk->next)
 			close(open(walk->value, O_WRONLY | O_CREAT | O_TRUNC, 0644));
 		walk = walk->next;
 	}
@@ -20,7 +22,7 @@ int	redirect_out(t_command *cmd)
 		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (out_fd == -1)
 	{
-		ft_puterr2("minishell: >: ", strerror(errno));
+		ft_puterr4("minishell: ", lst_last(cmd->redirect_out), ": ", strerror(errno));
 		return (FALSE);
 	}
 	if (dup2(out_fd, 1) == -1)
@@ -41,11 +43,11 @@ int	redirect_in(t_command *cmd)
 	int			in_fd;
 
 	if (lst_is_empty(cmd->redirect_in))
-		return (FALSE);
+		return (TRUE);
 	in_fd = open(lst_last(cmd->redirect_in), O_RDONLY);
 	if (in_fd == -1)
 	{
-		ft_puterr2("minishell: <: ", strerror(errno));
+		ft_puterr4("minishell: ", lst_last(cmd->redirect_in), ": ", strerror(errno));
 		return (FALSE);
 	}
 	if (dup2(in_fd, 0) == -1)
@@ -102,9 +104,8 @@ void	piper(t_command *cmd, t_iterator *it)
 
 int		do_redirect(t_command *cmd)
 {
-	redirect_in(cmd);
-	redirect_out(cmd);
-	cmd_distributor((char **)as_array(cmd->args));
+	if (redirect_in(cmd) && redirect_out(cmd))
+		cmd_distributor((char **)as_array(cmd->args));
 	dup2(g_global.fd[0], 0);
 	dup2(g_global.fd[1], 1);
 	if (g_global.cmd_ret)

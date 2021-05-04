@@ -174,6 +174,7 @@ void	test_adel(int prompt_size)
 			{
 				do_execute(clear, &clear);
 				ft_putstr(PROMPT);
+				ft_putstr(*g_global.line);
 			}
 			if (ft_str_equals(str, "\n") || (ft_str_equals(str, CTRL_D) && !pos))
 				break ;
