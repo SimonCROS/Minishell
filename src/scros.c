@@ -346,7 +346,7 @@ int	parse(t_command *command)
 			lst = command->redirect_out;
 		else if (current->token_type == T_REDIRECT_IN)
 			lst = command->redirect_in;
-		else
+		else if (!current->separator)
 			parse_token(&argument, current);
 		space = 0;
 	}
@@ -366,13 +366,13 @@ t_list	*parse_line(char *line)
 	if (!tokenize(tokens, line) || !validate(commands, tokens))
 		lst_clear(commands);
 
-	lst_foreach(tokens, (t_con)printtoken);
+	// lst_foreach(tokens, (t_con)printtoken);
 	lst_foreach(commands, (t_con)parse);
-	lst_foreach(commands, (t_con)printcommand);
+	// lst_foreach(commands, (t_con)printcommand);
 
 	lst_destroy(tokens);
 
-	lst_clear(commands);
+	// lst_clear(commands);
 
 	return (commands);
 }

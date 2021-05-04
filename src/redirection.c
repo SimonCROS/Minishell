@@ -102,8 +102,8 @@ void	piper(t_command *cmd, t_iterator *it)
 
 int		do_redirect(t_command *cmd)
 {
-	if (redirect_in(cmd) || redirect_out(cmd))
-		return (FALSE);
+	redirect_in(cmd);
+	redirect_out(cmd);
 	cmd_distributor((char **)as_array(cmd->args));
 	dup2(g_global.fd[0], 0);
 	dup2(g_global.fd[1], 1);

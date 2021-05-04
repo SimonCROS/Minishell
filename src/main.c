@@ -91,7 +91,7 @@ void	test_adel(void)
 	{
 		cpy = NULL;
 		walker = NULL;
-		ft_putstr("\033[32mMinishell> \033[0m");
+		ft_putstr("minishell> ");
 		tputs(save_cursor, 1, (int (*)(int))ft_putchar);
 		g_global.line = str_new();
 		tcsetattr(0, TCSANOW, &g_global.term);

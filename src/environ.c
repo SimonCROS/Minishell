@@ -26,4 +26,6 @@ void	load_environment(char **envp)
 		}
 		envp++;
 	}
+	if (map_contains_key(g_global.env, "OLDPWD"))
+		map_replace(g_global.env, "OLDPWD", NULL);
 }

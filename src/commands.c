@@ -50,6 +50,8 @@ void	do_cd(char **argv)
 	char	*home;
 
 	g_global.cmd_ret = 0;
+	if (map_contains_key(g_global.env, "OLDPWD"))
+		map_replace(g_global.env, "OLDPWD", ft_strdup(getcwd(g_global.pwd, MAXPATHLEN)));
 	if (argv[0] == NULL)
 	{
 		i = -1;
@@ -76,6 +78,8 @@ void	do_cd(char **argv)
 		ft_putendl_fd(strerror(errno), 2);
 		g_global.cmd_ret = errno;
 	}
+	if (map_contains_key(g_global.env, "PWD"))
+		map_replace(g_global.env, "PWD", ft_strdup(getcwd(g_global.pwd, MAXPATHLEN)));
 }
 
 void	do_pwd(char **argv)
@@ -113,6 +117,23 @@ int		check_export_arg(char *arg)
 	return (TRUE);
 }
 
+void	print_export(t_mapentry *elem)
+{
+	if (elem->value != NULL)
+	{
+		ft_putstr("declare -x ");
+		ft_putstr(elem->key);
+		ft_putstr("=\"");
+		ft_putstr(elem->value);
+		ft_putendl("\"");
+	}
+	else
+	{
+		ft_putstr("declare -x ");
+		ft_putendl(elem->key);
+	}
+}
+
 void	do_export(char **argv)
 {
 	t_map			*sort;
@@ -130,10 +151,7 @@ void	do_export(char **argv)
 		while (citerator_has_next(&iter))
 		{
 			elem = citerator_next(&iter);
-			if (elem->value != NULL)
-				printf("declare -x %s=\"%s\"\n", elem->key, elem->value);
-			else
-				printf("declare -x %s\n", elem->key);
+			print_export(elem);
 		}
 		map_free(sort);
 	}
