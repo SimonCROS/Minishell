@@ -84,6 +84,7 @@ void	piper(t_command *cmd, t_iterator *it)
 		}
 		close(fd[1]);
 		cmd = iterator_next(it);
+		parse(cmd);
 		if (cmd->next_relation == T_PIPE)
 			piper(cmd, it);
 		else
@@ -122,6 +123,7 @@ void	do_command(t_list *cmds)
 	while (iterator_has_next(&it))
 	{
 		cmd = iterator_next(&it);
+		parse(cmd);
 		if (cmd->next_relation == T_PIPE)
 			piper(cmd, &it);
 		else

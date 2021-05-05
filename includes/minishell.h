@@ -43,8 +43,7 @@ enum e_token_type
 	T_NONE,
 	T_WORD,
 	T_WHITESPACE,
-	T_LAZY_AND,
-	T_AND,
+	T_SEPARATOR,
 	T_SINGLE_QUOTE,
 	T_DOUBLE_QUOTE,
 	T_PIPE,
@@ -86,6 +85,9 @@ struct s_global
 	char			**line;
 };
 
+// to rm
+void	printcommand(t_command *command);
+
 /*** Commands *****************************************************************/
 
 struct s_command
@@ -101,6 +103,7 @@ struct s_command
 char		**ft_split_first(char *s, char c);
 int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
+int			parse(t_command *command);
 
 /*** Modeles ******************************************************************/
 

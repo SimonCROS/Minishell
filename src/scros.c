@@ -19,11 +19,9 @@ void	printtoken(t_token *token)
 		case T_WHITESPACE:
 			token_name = "space";
 			break;
-		case T_LAZY_AND:
-			token_name = "lazy and";
+		case T_SEPARATOR:
+			token_name = "separator";
 			break;
-		case T_AND:
-			token_name = "and";
 			break;
 		case T_SINGLE_QUOTE:
 			token_name = "sin quotes";
@@ -119,7 +117,7 @@ t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 		return (NULL);
 	token->token_type = type;
 	token->quoted = type == T_DOUBLE_QUOTE || type == T_SINGLE_QUOTE;
-	token->separator = type == T_AND || type == T_LAZY_AND || type == T_PIPE;
+	token->separator = type == T_SEPARATOR || type == T_PIPE;
 	token->buffer = str_new();
 	if (!token->buffer)
 	{
@@ -204,9 +202,7 @@ int	tokenize(t_list *tokens, char *line)
 			else if (line[i] == '>')
 				current = new_token(tokens, T_REDIRECT_OUT, current);
 			else if (line[i] == ';')
-				current = new_token(tokens, T_LAZY_AND, current);
-			else if (line[i] == '&')
-				current = new_token(tokens, T_AND, current);
+				current = new_token(tokens, T_SEPARATOR, current);
 			else if (line[i] == '$')
 				current = new_token(tokens, T_DOLLAR, current);
 			else if (current->token_type != T_DOLLAR)
@@ -229,14 +225,9 @@ int	tokenize(t_list *tokens, char *line)
 int	is_valid(t_token *token)
 {
 	if (token->separator)
-	{
-		if (token->token_type == T_AND && ft_strlen(*(token->buffer)) != 2)
-			return (FALSE);
-		else if ((token->token_type == T_LAZY_AND
-				|| token->token_type == T_PIPE)
+		if ((token->token_type == T_SEPARATOR || token->token_type == T_PIPE)
 			&& ft_strlen(*(token->buffer)) != 1)
 			return (FALSE);
-	}
 	if (token->quoted)
 	{
 		if (ft_strlen(*(token->buffer)) < 2 || (*(token->buffer))[0] !=
@@ -306,7 +297,7 @@ int	validate(t_list *commands, t_list *tokens)
 		}
 		current = (t_token *)lst_shift(tokens);
 	}
-	if (prev && (prev->token_type == T_REDIRECT_IN || prev->token_type == T_REDIRECT_OUT || prev->token_type == T_AND || prev->token_type == T_PIPE))
+	if (prev && (prev->token_type == T_REDIRECT_IN || prev->token_type == T_REDIRECT_OUT || prev->token_type == T_PIPE))
 	{
 		ft_putendl_fd("minish: syntax error: unexpected end of file", 2);
 		return (FALSE);
@@ -366,13 +357,9 @@ t_list	*parse_line(char *line)
 	if (!tokenize(tokens, line) || !validate(commands, tokens))
 		lst_clear(commands);
 
-	// lst_foreach(tokens, (t_con)printtoken);
-	lst_foreach(commands, (t_con)parse);
+	lst_foreach(tokens, (t_con)printtoken);
+	// lst_foreach(commands, (t_con)parse);
 	// lst_foreach(commands, (t_con)printcommand);
-
-	lst_destroy(tokens);
-
-	// lst_clear(commands);
 
 	return (commands);
 }
