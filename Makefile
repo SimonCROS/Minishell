@@ -7,8 +7,6 @@ LIBFT		= $(LIBFT_DIR)/libft.a
 
 SRCS		=	main.c								\
 				scros.c								\
-				gnl/get_next_line.c					\
-				gnl/get_next_line_utils.c			\
 				exec_command.c						\
 				commands.c							\
 				environ.c							\
