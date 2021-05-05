@@ -51,7 +51,7 @@ void	do_cd(char **argv)
 
 	g_global.cmd_ret = 0;
 	if (map_contains_key(g_global.env, "OLDPWD"))
-		map_replace(g_global.env, "OLDPWD", ft_strdup(getcwd(g_global.pwd, MAXPATHLEN)));
+		map_replace(g_global.env, "OLDPWD", ft_strdup(getcwd(g_global.oldpwd, MAXPATHLEN)));
 	if (argv[0] == NULL)
 	{
 		i = -1;
@@ -134,6 +134,27 @@ void	print_export(t_mapentry *elem)
 	}
 }
 
+char	**split_in_half(char *str, char splitter)
+{
+	char	**res;
+	char	*delim;
+
+	res = malloc(sizeof(char*) * 3);
+	res[2] = NULL;
+	delim = ft_strchr(str, splitter);
+	if (!delim)
+	{
+		res[0] = ft_strdup(str);
+		res[1] = NULL;
+		return (res);
+	}
+	*delim = 0;
+	delim++;
+	res[0] = ft_strdup(str);
+	res[1] = ft_strdup(delim);
+	return (res);
+}
+
 void	do_export(char **argv)
 {
 	t_map			*sort;
@@ -157,7 +178,7 @@ void	do_export(char **argv)
 	}
 	while (argv[++i])
 	{
-		res = as_listf((void **)ft_split(argv[i], '='), free);
+		res = as_listf((void **)split_in_half(argv[i], '='), free);
 		if (res != NULL)
 		{
 			if (!check_export_arg(res->first->value))
@@ -165,18 +186,18 @@ void	do_export(char **argv)
 				ft_puterr3("minishell: export: '", res->first->value, "': not a valid identifier");
 				g_global.cmd_ret = NOT_VALID;
 			}
-			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=' && map_contains_key(g_global.env, res->first->value))
+			else if (res->size == 1 && argv[i][ft_strlen(res->first->value)] == '=' && map_contains_key(g_global.env, res->first->value))
 				map_replace(g_global.env, lst_shift(res), ft_strdup(""));
-			else if (res->size == 1 && argv[i][ft_strlen(argv[i]) - 1] == '=')
+			else if (res->size == 1 && argv[i][ft_strlen(res->first->value)] == '=')
 				map_put(g_global.env, lst_shift(res), ft_strdup(""));
 			else if (res->size == 1 && map_contains_key(g_global.env, res->first->value))
-				map_replace(g_global.env, lst_shift(res), NULL);
+				;
 			else if (res->size == 1)
 				map_put(g_global.env, lst_shift(res), NULL);
-			else if (res->size >= 2 && map_contains_key(g_global.env, res->first->value))
-				map_replace(g_global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
-			else if (res->size >= 2)
-				map_put(g_global.env, lst_shift(res), lst_reduce(res, NULL, (t_bifun)env_compose, free));
+			else if (res->size == 2 && map_contains_key(g_global.env, res->first->value))
+				map_replace(g_global.env, lst_shift(res), lst_shift(res));
+			else if (res->size == 2)
+				map_put(g_global.env, lst_shift(res), lst_shift(res));
 			lst_destroy(res);
 		}
 	}

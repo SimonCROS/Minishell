@@ -77,6 +77,7 @@ struct s_gnl_entry
 struct s_global
 {
 	char			pwd[MAXPATHLEN];
+	char			oldpwd[MAXPATHLEN];
 	t_map			*env;
 	int				cmd_ret;
 	struct termios	term;
@@ -84,6 +85,9 @@ struct s_global
 	int				fd[2];
 	struct winsize	wnsze;
 	char			**line;
+	int				pos;
+	char			*line_cpy;
+	t_dentry		*history;
 };
 
 /*** Commands *****************************************************************/
