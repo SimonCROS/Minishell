@@ -284,7 +284,7 @@ int	validate(t_list *commands, t_list *tokens)
 		{
 			if (!is_valid(current) || (current->separator && !prev) || (current->separator && prev->separator))
 			{
-				ft_puterr3("minish: syntax error near unexpected token `", *(current->buffer), "'");
+				ft_puterr3("minish: syntax error near `", *(current->buffer), "'");
 				return (FALSE);
 			}
 			if (current->separator)
