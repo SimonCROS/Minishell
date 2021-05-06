@@ -19,7 +19,7 @@ char	**get_env_path(char *path)
 	if (!val)
 	{
 		errno = 2;
-		ft_puterr4("minishell: ", path, ": ", strerror(errno));
+		ft_puterr3(path, ": ", strerror(errno));
 		g_global.cmd_ret = errno;
 		return (NULL);
 	}
@@ -92,8 +92,9 @@ void	do_execute(char *path, char **argv)
 		if (pid == 0)
 			if (execve(path, argv, array) == ERROR)
 			{
-				ft_putendl_fd(strerror(errno), 2);
+				ft_puterr(strerror(errno));
 				g_global.cmd_ret = errno;
+				exit(1);
 			}
 		return ;
 	}
@@ -115,14 +116,15 @@ void	do_execute(char *path, char **argv)
 		{
 			if (execve(path, argv, array) == ERROR)
 			{
-				ft_putendl_fd(strerror(errno), 2);
+				ft_puterr(strerror(errno));
 				g_global.cmd_ret = errno;
+				exit(1);
 			}
 		}
 	}
 	else
 	{
-		ft_puterr2("minishell: command not found: ", path);
+		ft_puterr2("command not found: ", path);
 		g_global.cmd_ret = errno;
 	}
 	i = -1;

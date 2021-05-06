@@ -79,6 +79,7 @@ struct s_global
 	char			oldpwd[MAXPATHLEN];
 	t_map			*env;
 	int				cmd_ret;
+	int				in_cmd;
 	struct termios	term;
 	struct termios	save;
 	int				fd[2];
@@ -125,8 +126,16 @@ void		cmd_distributor(char **argv);
 void		do_command(t_list *cmds);
 int			do_redirect(t_command *cmd);
 
+void		ft_puterr(char *a);
 void		ft_puterr2(char *a, char *b);
 void		ft_puterr3(char *a, char *b, char *c);
 void		ft_puterr4(char *a, char *b, char *c, char *d);
+
+int			key_handler(char *str, int prompt_size, t_dlist *history);
+void		do_clear(void);
+void		do_key_print(char *str, int prompt_size);
+void		do_key_backspace(int prompt_size);
+void		do_key_down(void);
+void		do_key_up(t_dlist *history);
 
 #endif

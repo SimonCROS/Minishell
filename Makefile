@@ -10,7 +10,9 @@ SRCS		=	main.c								\
 				exec_command.c						\
 				commands.c							\
 				environ.c							\
-				redirection.c
+				redirection.c						\
+				key_handler1.c						\
+				key_handler2.c
 
 OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))
 
