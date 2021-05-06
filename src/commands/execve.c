@@ -1,12 +1,5 @@
 #include "minishell.h"
 
-int		file_exists(char *filename)
-{
-	struct stat		buffer;
-
-	return (stat(filename, &buffer) == 0);
-}
-
 char	**get_env_path(char *path)
 {
 	int		i;
@@ -76,6 +69,34 @@ char	**map_as_array(void)
 	return (array);
 }
 
+void	execute_from_path(char *path, char **env_path, char **argv, char **env)
+{
+	int		i;
+	int		pid;
+
+	i = -1;
+	while (env_path[++i])
+	{
+		if (file_exists(env_path[i]))
+		{
+			path = env_path[i];
+			break ;
+		}
+	}
+	if (file_exists(env_path[i]))
+	{
+		pid = fork();
+		wait(NULL);
+		if (pid == 0 && execve(path, argv, env) == ERROR)
+			execve_err();
+	}
+	else
+	{
+		ft_puterr2("command not found: ", path);
+		g_global.cmd_ret = errno;
+	}
+}
+
 void	do_execute(char *path, char **argv)
 {
 	int		pid;
@@ -89,47 +110,17 @@ void	do_execute(char *path, char **argv)
 	{
 		pid = fork();
 		wait(NULL);
-		if (pid == 0)
-			if (execve(path, argv, array) == ERROR)
-			{
-				ft_puterr(strerror(errno));
-				g_global.cmd_ret = errno;
-				exit(1);
-			}
+		if (pid == 0 && execve(path, argv, array) == ERROR)
+			execve_err();
 		return ;
 	}
 	env_path = get_env_path(path);
 	if (!env_path)
 		return ;
-	i = -1;
-	while (env_path[++i])
-		if (file_exists(env_path[i]))
-		{
-			path = env_path[i];
-			break ;
-		}
-	if (file_exists(env_path[i]))
-	{
-		pid = fork();
-		wait(NULL);
-		if (pid == 0)
-		{
-			if (execve(path, argv, array) == ERROR)
-			{
-				ft_puterr(strerror(errno));
-				g_global.cmd_ret = errno;
-				exit(1);
-			}
-		}
-	}
-	else
-	{
-		ft_puterr2("command not found: ", path);
-		g_global.cmd_ret = errno;
-	}
+	execute_from_path(path, env_path, argv, array);
 	i = -1;
 	while (array[++i])
 		free(array[i]);
 	free(array);
-	lst_destroy(as_listf((void**)env_path, free));
+	lst_destroy(as_listf((void **)env_path, free));
 }

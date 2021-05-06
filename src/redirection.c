@@ -10,19 +10,18 @@ int	redirect_out(t_command *cmd)
 	walk = cmd->redirect_out->first;
 	while (walk)
 	{
-		if (walk->next && cmd->append)
-			close(open(walk->value, O_WRONLY | O_CREAT | O_APPEND, 0644));
-		else if (walk->next)
-			close(open(walk->value, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+		if (cmd->append)
+			out_fd = open(walk->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		else
+			out_fd = open(walk->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (walk->next)
+			close(out_fd);
 		walk = walk->next;
 	}
-	if (cmd->append)
-		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_APPEND, 0644);
-	else
-		out_fd = open(lst_last(cmd->redirect_out), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (out_fd == -1)
 	{
 		ft_puterr3(lst_last(cmd->redirect_out), ": ", strerror(errno));
+		g_global.cmd_ret = errno;
 		return (FALSE);
 	}
 	dup2(out_fd, 1);
@@ -33,14 +32,23 @@ int	redirect_out(t_command *cmd)
 int	redirect_in(t_command *cmd)
 {
 	int			in_fd;
+	t_entry		*walk;
 
 	if (lst_is_empty(cmd->redirect_in))
 		return (TRUE);
-	in_fd = open(lst_last(cmd->redirect_in), O_RDONLY);
-	if (in_fd == -1)
+	walk = cmd->redirect_in->first;
+	while (walk)
 	{
-		ft_puterr3(lst_last(cmd->redirect_in), ": ", strerror(errno));
-		return (FALSE);
+		in_fd = open(walk->value, O_RDWR);
+		if (in_fd == -1)
+		{
+			ft_puterr3(walk->value, ": ", strerror(errno));
+			g_global.cmd_ret = errno;
+			return (FALSE);
+		}
+		if (walk->next)
+			close(in_fd);
+		walk = walk->next;
 	}
 	dup2(in_fd, 0);
 	close(in_fd);
@@ -75,7 +83,7 @@ void	piper(t_command *cmd, t_iterator *it)
 	}
 }
 
-int		do_redirect(t_command *cmd)
+int	do_redirect(t_command *cmd)
 {
 	if (redirect_in(cmd) && redirect_out(cmd))
 		cmd_distributor((char **)as_array(cmd->args));

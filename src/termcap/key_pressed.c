@@ -49,7 +49,8 @@ void	do_key_backspace(int prompt_size)
 	if ((g_global.pos + prompt_size) % g_global.wnsze.ws_col == 0)
 	{
 		tputs(cursor_up, 1, (int (*)(int))ft_putchar);
-		tputs(tgoto(tgetstr("ch", NULL), 0, g_global.wnsze.ws_col - 1), 1, (int (*)(int))ft_putchar);
+		tputs(tgoto(tgetstr("ch", NULL), 0, g_global.wnsze.ws_col - 1), 1, \
+		(int (*)(int))ft_putchar);
 		tputs(clr_eos, 1, (int (*)(int))ft_putchar);
 	}
 	else
@@ -60,14 +61,9 @@ void	do_key_backspace(int prompt_size)
 		g_global.pos--;
 }
 
-void	do_key_print(char *str, int prompt_size)
+void	do_key_print(char *str)
 {
 	ft_putchar(*str);
 	str_cappend(g_global.line, *str);
-	// if ((g_global.pos + prompt_size) % g_global.wnsze.ws_col == g_global.wnsze.ws_col - 1)
-	// {
-	// 	tputs(cursor_down, 1, (int (*)(int))ft_putchar);
-	// 	tputs(tgetstr("cr", NULL), 1, (int (*)(int))ft_putchar);
-	// }
 	g_global.pos++;
 }

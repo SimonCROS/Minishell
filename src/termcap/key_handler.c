@@ -18,13 +18,15 @@ int	key_handler(char *str, int prompt_size, t_dlist *history)
 		do_key_up(history);
 	else if (ft_str_equals(str, key_down))
 		do_key_down();
-	else if (g_global.pos && (ft_str_equals(str, "\177") || ft_str_equals(str, key_backspace)))
+	else if (g_global.pos && (ft_str_equals(str, "\177") || \
+	ft_str_equals(str, key_backspace)))
 		do_key_backspace(prompt_size);
 	else if (*str > 31 && *str < 127)
-		do_key_print(str, prompt_size);
+		do_key_print(str);
 	else if (*str == 12 && *(str + 1) == 0)
 		do_clear();
-	if (ft_str_equals(str, "\n") || (ft_str_equals(str, CTRL_D) && !g_global.pos))
+	if (ft_str_equals(str, "\n") || (ft_str_equals(str, CTRL_D) && \
+	!g_global.pos))
 		return (TRUE);
 	if (ft_str_equals(str, CTRL_D))
 		tputs(bell, 1, (int (*)(int))ft_putchar);
