@@ -357,11 +357,11 @@ t_list	*parse_line(char *line)
 	if (!tokenize(tokens, line) || !validate(commands, tokens))
 		lst_clear(commands);
 
-	lst_foreach(tokens, (t_con)printtoken);
+	// lst_foreach(tokens, (t_con)printtoken);
 	// lst_foreach(commands, (t_con)parse);
 	// lst_foreach(commands, (t_con)printcommand);
 
-	lst_free(tokens);
+	lst_destroy(tokens);
 
 	return (commands);
 }
