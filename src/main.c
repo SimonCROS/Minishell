@@ -24,14 +24,19 @@ void	cmd_distributor(char **argv)
 
 int	main(int argc, char *argv[], char *envp[])
 {
-	int		prompt_size;
+	// int		prompt_size;
+	t_list		*cmds;
 
+	cmds = parse_line("echo abc | echo def");
+	// do_command(cmds);
+	lst_destroy(cmds);
 	(void)argc;
 	(void)argv;
-	prompt_size = initialize(envp);
-	signal(SIGQUIT, signal_handler);
-	signal(SIGWINCH, signal_handler);
-	signal(SIGINT, signal_handler);
-	terminal(prompt_size);
+	(void)envp;
+	// prompt_size = initialize(envp);
+	// signal(SIGQUIT, signal_handler);
+	// signal(SIGWINCH, signal_handler);
+	// signal(SIGINT, signal_handler);
+	// terminal(prompt_size);
 	return (0);
 }

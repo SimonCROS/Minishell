@@ -141,7 +141,7 @@ t_command	*new_command(t_list *commands)
 	command = malloc(sizeof(t_command));
 	if (!command)
 		return (NULL);
-	command->tokens = lst_new(free);
+	command->tokens = lst_new((t_consumer)free_token);
 	command->args = lst_new(free);
 	command->redirect_in = lst_new(free);
 	command->redirect_out = lst_new(free);
@@ -360,6 +360,8 @@ t_list	*parse_line(char *line)
 	lst_foreach(tokens, (t_con)printtoken);
 	// lst_foreach(commands, (t_con)parse);
 	// lst_foreach(commands, (t_con)printcommand);
+
+	lst_free(tokens);
 
 	return (commands);
 }
