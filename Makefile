@@ -7,10 +7,22 @@ LIBFT		= $(LIBFT_DIR)/libft.a
 
 SRCS		=	main.c								\
 				scros.c								\
-				exec_command.c						\
-				commands.c							\
-				environ.c							\
-				redirection.c
+				redirection.c						\
+				commands/cd.c						\
+				commands/echo.c						\
+				commands/env.c						\
+				commands/execve.c					\
+				commands/exit.c						\
+				commands/export.c					\
+				commands/pwd.c						\
+				commands/unset.c					\
+				termcap/key_handler.c				\
+				termcap/key_pressed.c				\
+				termcap/terminal.c					\
+				utilities/environ.c					\
+				utilities/init.c					\
+				utilities/put_error.c				\
+				signal.c
 
 OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))
 
