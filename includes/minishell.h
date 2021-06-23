@@ -147,4 +147,17 @@ void		do_key_backspace(int prompt_size);
 void		do_key_down(void);
 void		do_key_up(t_dlist *history);
 
+/*** GNL **********************************************************************/
+
+struct s_gnl_entry
+{
+	void	*next;
+	int		fd;
+	char	*content;
+};
+
+char		**ft_gnl_split(char *s, char c);
+int			get_next_line(int fd, char **line);
+int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
+
 #endif
