@@ -26,7 +26,11 @@ int	main(int argc, char *argv[], char *envp[])
 {
 	int		prompt_size;
 
-	(void)argc;
+	if (argc != 1)
+	{
+		write(1, "Error: wrong number of arguments.\n", 34);
+		return (1);
+	}
 	(void)argv;
 	prompt_size = initialize(envp);
 	signal(SIGQUIT, signal_handler);
