@@ -288,7 +288,7 @@ t_list	*parse_line(char *line)
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
 	empty = null_token();
-	if (!tokenize(tokens, line, &empty) /*|| !validate(commands, tokens)*/)
+	if (!tokenize(tokens, &line, &empty) /*|| !validate(commands, tokens)*/)
 		lst_clear(commands);
 
 	lst_foreach(tokens, (t_con)printtoken);

@@ -57,6 +57,7 @@ enum e_token_type
 
 struct s_token
 {
+	t_list			*children;
 	char			**buffer;
 	t_token_type	type;
 	int				quoted;
@@ -118,7 +119,7 @@ char		**ft_split_first(char *s, char c);
 int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 int			parse(t_command *command);
-int			tokenize(t_list *tokens, char *line, t_token *parent);
+int			tokenize(t_list *tokens, char **line, t_token *parent);
 t_token		null_token(void);
 void		free_token(t_token *token);
 
