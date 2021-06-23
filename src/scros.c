@@ -7,11 +7,16 @@ void	print(char *str)
 	printf("|%s| ", str);
 }
 
+void	print_redirect(t_redirect *redirection)
+{
+	print(redirection->str);
+}
+
 void	printtoken(t_token *token)
 {
 	char	*token_name;
 
-	switch (token->token_type)
+	switch (token->type)
 	{
 		case T_WORD:
 			token_name = "word";
@@ -38,8 +43,8 @@ void	printtoken(t_token *token)
 		case T_REDIRECT_OUT:
 			token_name = "out";
 			break;
-		case T_DOLLAR:
-			token_name = "dollar";
+		case T_VAR:
+			token_name = "variable";
 			break;
 		default:
 			token_name = "eoi";
@@ -63,27 +68,16 @@ void	printcommand(t_command *command)
 	if (command->redirect_out->size)
 	{
 		printf("> ");
-		lst_foreach(command->redirect_out, (t_con)print);
+		lst_foreach(command->redirect_out, (t_con)print_redirect);
 		printf("(%s)", command->append ? "append" : "replace");
 		printf("\n");
 	}
 	if (command->redirect_in->size)
 	{
 		printf("< ");
-		lst_foreach(command->redirect_in, (t_con)print);
+		lst_foreach(command->redirect_in, (t_con)print_redirect);
 		printf("\n");
 	}
-}
-
-void	free_token(t_token *token)
-{
-	if (token)
-	{
-		if (token->buffer)
-			free(*(token->buffer));
-		free(token->buffer);
-	}
-	free(token);
 }
 
 void	free_command(t_command *command)
@@ -102,36 +96,15 @@ int	token_equals(t_token *t1, t_token *t2)
 {
 	if (!t1 || !t2 || !t1->buffer || !t2->buffer)
 		return (FALSE);
-	return (t1->quoted == t2->quoted && t1->token_type == t2->token_type
+	return (t1->quoted == t2->quoted && t1->type == t2->type
 		&& ft_str_equals(*(t1->buffer), *(t2->buffer)));
 }
 
-t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
+void	free_redirect(t_redirect *redirect)
 {
-	t_token	*token;
-
-	if (cur && cur->token_type == type)
-		return (cur);
-	token = malloc(sizeof(t_token));
-	if (!token)
-		return (NULL);
-	token->token_type = type;
-	token->quoted = type == T_DOUBLE_QUOTE || type == T_SINGLE_QUOTE;
-	token->separator = type == T_SEPARATOR || type == T_PIPE;
-	token->buffer = str_new();
-	if (!token->buffer)
-	{
-		free_token(token);
-		return (NULL);
-	}
-	if (!tokens)
-		return (token);
-	if (!lst_push(tokens, token))
-	{
-		free_token(token);
-		return (NULL);
-	}
-	return (token);
+	if (redirect)
+		free(redirect->str);
+	free(redirect);
 }
 
 t_command	*new_command(t_list *commands)
@@ -143,8 +116,8 @@ t_command	*new_command(t_list *commands)
 		return (NULL);
 	command->tokens = lst_new((t_consumer)free_token);
 	command->args = lst_new(free);
-	command->redirect_in = lst_new(free);
-	command->redirect_out = lst_new(free);
+	command->redirect_in = lst_new((t_con)free_redirect);
+	command->redirect_out = lst_new((t_con)free_redirect);
 	if (!command->tokens || !command->args || !command->redirect_in || !command->redirect_out)
 	{
 		free_command(command);
@@ -161,71 +134,13 @@ t_command	*new_command(t_list *commands)
 	return (command);
 }
 
-t_token	null_token(void)
-{
-	return ((t_token){NULL, T_NONE, FALSE, FALSE});
-}
-
 // To protect
-int	tokenize(t_list *tokens, char *line)
-{
-	t_token	*current;
-	int		escaped;
-	t_token	empty;
-	int		i;
 
-	empty = null_token();
-	current = &empty;
-	escaped = 0;
-	i = -1;
-	while (line[++i])
-	{
-		if (line[i] == '\\' && !escaped)
-		{
-			if (!current->quoted)
-				current = new_token(tokens, T_WORD, current);
-			escaped = 1;
-			continue ;
-		}
-		if (!current->quoted && !escaped)
-		{
-			if (line[i] == '|')
-				current = new_token(tokens, T_PIPE, current);
-			else if (line[i] == '\"')
-				current = new_token(tokens, T_DOUBLE_QUOTE, current);
-			else if (line[i] == '\'')
-				current = new_token(tokens, T_SINGLE_QUOTE, current);
-			else if (line[i] == ' ' || line[i] == '\t')
-				current = new_token(tokens, T_WHITESPACE, current);
-			else if (line[i] == '<')
-				current = new_token(tokens, T_REDIRECT_IN, current);
-			else if (line[i] == '>')
-				current = new_token(tokens, T_REDIRECT_OUT, current);
-			else if (line[i] == ';')
-				current = new_token(tokens, T_SEPARATOR, current);
-			else if (line[i] == '$')
-				current = new_token(tokens, T_DOLLAR, current);
-			else if (current->token_type != T_DOLLAR)
-				current = new_token(tokens, T_WORD, current);
-		}
-		else if (line[i] == **(current->buffer) && !escaped)
-		{
-			str_cappend(current->buffer, line[i]);
-			current = &empty;
-			continue ;
-		}
-		if (current->token_type == T_NONE)
-			current = new_token(tokens, T_WORD, current);
-		str_cappend(current->buffer, line[i]);
-		escaped = 0;
-	}
-	return (!escaped);
-}
 
 int	is_valid(t_token *token)
 {
 	if (token->separator)
-		if ((token->token_type == T_SEPARATOR || token->token_type == T_PIPE)
+		if ((token->type == T_SEPARATOR || token->type == T_PIPE)
 			&& ft_strlen(*(token->buffer)) != 1)
 			return (FALSE);
 	if (token->quoted)
@@ -234,9 +149,9 @@ int	is_valid(t_token *token)
 			(*(token->buffer))[ft_strlen(*(token->buffer)) - 1])
 			return (FALSE);
 	}
-	if (token->token_type == T_REDIRECT_IN && ft_strlen(*(token->buffer)) > 1)
+	if (token->type == T_REDIRECT_IN && ft_strlen(*(token->buffer)) > 1)
 		return (FALSE);
-	if (token->token_type == T_REDIRECT_OUT && ft_strlen(*(token->buffer)) > 2)
+	if (token->type == T_REDIRECT_OUT && ft_strlen(*(token->buffer)) > 2)
 		return (FALSE);
 	return (TRUE);
 }
@@ -252,7 +167,7 @@ int	parse_token(char **container, t_token *token)
 {
 	if (token->quoted)
 		str_append(container, ft_substr(*(token->buffer), 1, ft_strlen(*(token->buffer)) - 2));
-	else if (token->token_type == T_DOLLAR)
+	else if (token->type == T_VAR)
 		str_append(container, parse_variable(*(token->buffer)));
 	else
 		str_append(container, *(token->buffer));
@@ -278,7 +193,7 @@ int	validate(t_list *commands, t_list *tokens)
 	{
 		started = 1;
 		lst_push(command->tokens, current);
-		if (current->token_type == T_WHITESPACE)
+		if (current->type == T_WHITESPACE)
 			space = 1;
 		else
 		{
@@ -289,7 +204,7 @@ int	validate(t_list *commands, t_list *tokens)
 			}
 			if (current->separator)
 			{
-				command->next_relation = current->token_type;
+				command->next_relation = current->type;
 				command = new_command(commands);
 			}
 			prev = current;
@@ -297,7 +212,7 @@ int	validate(t_list *commands, t_list *tokens)
 		}
 		current = (t_token *)lst_shift(tokens);
 	}
-	if (prev && (prev->token_type == T_REDIRECT_IN || prev->token_type == T_REDIRECT_OUT || prev->token_type == T_PIPE))
+	if (prev && (prev->type == T_REDIRECT_IN || prev->type == T_REDIRECT_OUT || prev->type == T_PIPE))
 	{
 		ft_putendl_fd("minish: syntax error: unexpected end of file", 2);
 		return (FALSE);
@@ -320,29 +235,47 @@ int	parse(t_command *command)
 	while (iterator_has_next(&tokens_iterator))
 	{
 		current = (t_token *)iterator_next(&tokens_iterator);
-		if (current->token_type == T_WHITESPACE)
+		if (current->type == T_WHITESPACE)
 		{
 			space = 1;
 			continue ;
 		}
-		if ((current->separator || current->token_type == T_REDIRECT_IN || current->token_type == T_REDIRECT_OUT || space) && argument)
+		if ((current->separator || current->type == T_REDIRECT_IN || current->type == T_REDIRECT_OUT || space) && argument)
 		{
-			lst_push(lst, argument);
+			if (lst == command->redirect_in || lst == command->redirect_out)
+			{
+				t_redirect	*redirection = malloc(sizeof(t_redirect));
+				if (redirection)
+					*redirection = (t_redirect){1, argument};
+				lst_push(lst, redirection);
+			}
+			else
+				lst_push(lst, argument);
 			argument = NULL;
 			lst = command->args;
-			if (current->token_type == T_REDIRECT_OUT)
+			if (current->type == T_REDIRECT_OUT)
 				command->append = ft_strlen(*(current->buffer)) == 2;
 		}
-		if (current->token_type == T_REDIRECT_OUT)
+		if (current->type == T_REDIRECT_OUT)
 			lst = command->redirect_out;
-		else if (current->token_type == T_REDIRECT_IN)
+		else if (current->type == T_REDIRECT_IN)
 			lst = command->redirect_in;
 		else if (!current->separator)
 			parse_token(&argument, current);
 		space = 0;
 	}
 	if (argument)
-		lst_push(lst, argument);
+	{
+		if (lst == command->redirect_in || lst == command->redirect_out)
+		{
+			t_redirect	*redirection = malloc(sizeof(t_redirect));
+			if (redirection)
+				*redirection = (t_redirect){1, argument};
+			lst_push(lst, redirection);
+		}
+		else
+			lst_push(lst, argument);
+	}
 	return (TRUE);
 }
 
@@ -350,16 +283,19 @@ t_list	*parse_line(char *line)
 {
 	t_list	*tokens;
 	t_list	*commands;
+	t_token	empty;
 
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
-
-	if (!tokenize(tokens, line) || !validate(commands, tokens))
+	empty = null_token();
+	if (!tokenize(tokens, line, &empty) /*|| !validate(commands, tokens)*/)
 		lst_clear(commands);
 
-	// lst_foreach(tokens, (t_con)printtoken);
-	// lst_foreach(commands, (t_con)parse);
-	// lst_foreach(commands, (t_con)printcommand);
+	lst_foreach(tokens, (t_con)printtoken);
+	lst_foreach(commands, (t_con)parse);
+	lst_foreach(commands, (t_con)printcommand);
+	printf("---------------\n");
+	lst_clear(commands);
 
 	lst_destroy(tokens);
 

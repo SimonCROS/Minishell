@@ -19,6 +19,7 @@ typedef struct s_global		t_global;
 
 typedef struct s_gnl_entry	t_gnl_entry;
 
+typedef struct s_redirect	t_redirect;
 typedef struct s_command	t_command;
 
 typedef struct s_token		t_token;
@@ -51,13 +52,13 @@ enum e_token_type
 	T_PIPE,
 	T_REDIRECT_IN,
 	T_REDIRECT_OUT,
-	T_DOLLAR
+	T_VAR
 };
 
 struct s_token
 {
 	char			**buffer;
-	t_token_type	token_type;
+	t_token_type	type;
 	int				quoted;
 	int				separator;
 };
@@ -97,6 +98,12 @@ void	printcommand(t_command *command);
 
 /*** Commands *****************************************************************/
 
+struct s_redirect
+{
+	int		fd;
+	char	*str;
+};
+
 struct s_command
 {
 	t_list			*args;
@@ -111,6 +118,9 @@ char		**ft_split_first(char *s, char c);
 int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 int			parse(t_command *command);
+int			tokenize(t_list *tokens, char *line, t_token *parent);
+t_token		null_token(void);
+void		free_token(t_token *token);
 
 /*** Modeles ******************************************************************/
 

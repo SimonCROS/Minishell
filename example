@@ -1,0 +1,8 @@
+echo ! ' Dpkg ::Progress-Fancy "1"; ' ! > /etc/apt/apt.conf.d/99progressbar
+^^^^   ^ ^^^^^^^^^^^^^^^^^^^^^^^^^^ ^   ^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+word   |            word            |   |                word
+     quote                        quote |  
+	                             redirect out (1)
+
+
+echo "export PATH=\"$LOCAL_BIN:\$PATH\"" >> $USER_HOME/.zprofile
