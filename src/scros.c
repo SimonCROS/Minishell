@@ -12,7 +12,7 @@ void	print_redirect(t_redirect *redirection)
 	print(redirection->str);
 }
 
-void	printtoken(t_token *token)
+void	printtoken(t_token *token, t_token *parent)
 {
 	char	*token_name;
 
@@ -49,17 +49,24 @@ void	printtoken(t_token *token)
 		default:
 			token_name = "eoi";
 	}
-	printf("\033[33m%10s \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
-		token_name, *(token->buffer));
+	if (token->children->size)
+		lst_foreachp(token->children, (t_bicon)printtoken, token);
+	else
+	{
+		if (!parent)
+			printf("\033[33m%10s \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
+				token_name, *(token->buffer));
+		else
+			printf("\033[34m%10s \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
+				token_name, *(token->buffer));
+	}
 }
 
 void	printcommand(t_command *command)
 {
-	printf("---------------\n");
+	parse(command);
 	if (command->tokens->size)
-	{
-		lst_foreach(command->tokens, (t_con)printtoken);
-	}
+		lst_foreachp(command->tokens, (t_bicon)printtoken, NULL);
 	if (command->args->size)
 	{
 		lst_foreach(command->args, (t_con)print);
@@ -78,6 +85,11 @@ void	printcommand(t_command *command)
 		lst_foreach(command->redirect_in, (t_con)print_redirect);
 		printf("\n");
 	}
+	lst_clear(command->args);
+	lst_clear(command->redirect_in);
+	lst_clear(command->redirect_out);
+	command->append = FALSE;
+	printf("---------------\n");
 }
 
 void	free_command(t_command *command)
@@ -158,9 +170,9 @@ int	is_valid(t_token *token)
 
 char	*parse_variable(char *str)
 {
-	if (!str[1])
+	if (!*str)
 		return ("$");
-	return (/* parse */str);
+	return (map_get(g_global.env, str));
 }
 
 int	parse_token(char **container, t_token *token)
@@ -288,16 +300,10 @@ t_list	*parse_line(char *line)
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
 	empty = null_token();
-	if (!tokenize(tokens, &line, &empty) /*|| !validate(commands, tokens)*/)
+	empty.children = tokens;
+	if (!tokenize(&empty, &line) || !validate(commands, tokens))
 		lst_clear(commands);
-
-	lst_foreach(tokens, (t_con)printtoken);
-	lst_foreach(commands, (t_con)parse);
 	lst_foreach(commands, (t_con)printcommand);
-	printf("---------------\n");
-	lst_clear(commands);
-
 	lst_destroy(tokens);
-
 	return (commands);
 }
