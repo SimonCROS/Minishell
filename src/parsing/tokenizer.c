@@ -50,6 +50,8 @@ static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 
 int	is_valid_variable_char(char c, char *str)
 {
+	if (str[0] == '?')
+		return (FALSE);
 	if (!str[0])
 		return (ft_isalpha(c) || c == '_' || c == '?');
 	else

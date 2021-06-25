@@ -73,6 +73,8 @@ char	*parse_variable(char *str)
 {
 	if (!*str)
 		return ("$");
+	if (str[0] == '?')
+		return (ft_itoa(g_global.cmd_ret));
 	return (map_get(g_global.env, str));
 }
 
@@ -81,7 +83,10 @@ int	parse_token(t_token *token, char **container)
 	if (token->quoted)
 		lst_foreachp(token->children, (t_bicon)parse_token, container);
 	else if (token->type == T_VAR)
+	{
+		// as_listf(ft_split())
 		str_append(container, parse_variable(*(token->buffer)));
+	}
 	else
 		str_append(container, *(token->buffer));
 	return (TRUE);
@@ -205,6 +210,7 @@ t_list	*parse_line(char *line)
 	if (!tokenize(&empty, &line) || !validate(commands, tokens))
 		lst_clear(commands);
 	// lst_foreach(commands, (t_con)printcommand);
+	// lst_clear(commands);
 	lst_destroy(tokens);
 	return (commands);
 }

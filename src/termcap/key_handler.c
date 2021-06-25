@@ -2,11 +2,7 @@
 
 void	do_clear(void)
 {
-	char	*clear[2];
-
-	clear[0] = "clear";
-	clear[1] = NULL;
-	do_execute(clear[0], clear);
+	tputs(clear_screen, 1, (int (*)(int))ft_putchar);
 	ft_putstr(PROMPT);
 	tputs(save_cursor, 1, (int (*)(int))ft_putchar);
 	ft_putstr(*g_global.line);
