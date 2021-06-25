@@ -9,6 +9,7 @@ SRCS		=	main.c								\
 				scros.c								\
 				redirection.c						\
 				parsing/tokenizer.c					\
+				parsing/debuger.c					\
 				commands/cd.c						\
 				commands/echo.c						\
 				commands/env.c						\

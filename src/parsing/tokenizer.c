@@ -48,6 +48,14 @@ static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 	return (token);
 }
 
+int	is_valid_variable_char(char c, char *str)
+{
+	if (!str[0])
+		return (ft_isalpha(c) || c == '_' || c == '?');
+	else
+		return (ft_isalnum(c) || c == '_');
+}
+
 int	tokenize(t_token *parent, char **line)
 {
 	t_token	*current;
@@ -100,14 +108,16 @@ int	tokenize(t_token *parent, char **line)
 				current = new_token(parent->children, T_REDIRECT_OUT, current);
 			else if (c == ';')
 				current = new_token(parent->children, T_SEPARATOR, current);
-			else if (current->type != T_VAR)
+			else if (current->type != T_VAR
+				|| !is_valid_variable_char(c, *current->buffer))
 				current = new_token(parent->children, T_WORD, current);
 		}
 		else if ((c == '\"' && !escaped && parent->type == T_DOUBLE_QUOTE))
 			return (TRUE);
 		else if ((c == '\'' && parent->type == T_SINGLE_QUOTE))
 			return (TRUE);
-		if (current->type == T_NONE)
+		else if (current->type != T_VAR
+			|| !is_valid_variable_char(c, *current->buffer))
 			current = new_token(parent->children, T_WORD, current);
 		str_cappend(current->buffer, c);
 		escaped = parent->type == T_SINGLE_QUOTE;

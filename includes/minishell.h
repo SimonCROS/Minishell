@@ -64,6 +64,8 @@ struct s_token
 	t_list			*children;
 };
 
+int			is_valid_variable_char(char c, char *str);
+
 /*** Parsing ******************************************************************/
 
 t_list		*parse_line(char *line);
@@ -157,5 +159,12 @@ void		do_key_print(char *str);
 void		do_key_backspace(int prompt_size);
 void		do_key_down(void);
 void		do_key_up(t_dlist *history);
+
+// --- DEBUG --- \\
+
+void		printcommand(t_command *command);
+void		printtoken(t_token *token, t_token *parent);
+void		print_redirect(t_redirect *redirection);
+void		print(char *str);
 
 #endif

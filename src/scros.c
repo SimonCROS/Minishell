@@ -1,96 +1,4 @@
-#include <stdio.h>
-
 #include "minishell.h"
-
-void	print(char *str)
-{
-	printf("|%s| ", str);
-}
-
-void	print_redirect(t_redirect *redirection)
-{
-	print(redirection->str);
-}
-
-void	printtoken(t_token *token, t_token *parent)
-{
-	char	*token_name;
-
-	switch (token->type)
-	{
-		case T_WORD:
-			token_name = "word";
-			break;
-		case T_WHITESPACE:
-			token_name = "space";
-			break;
-		case T_SEPARATOR:
-			token_name = "separator";
-			break;
-			break;
-		case T_SINGLE_QUOTE:
-			token_name = "sin quotes";
-			break;
-		case T_DOUBLE_QUOTE:
-			token_name = "quotes";
-			break;
-		case T_PIPE:
-			token_name = "pipe";
-			break;
-		case T_REDIRECT_IN:
-			token_name = "in";
-			break;
-		case T_REDIRECT_OUT:
-			token_name = "out";
-			break;
-		case T_VAR:
-			token_name = "variable";
-			break;
-		default:
-			token_name = "eoi";
-	}
-	if (token->children->size)
-		lst_foreachp(token->children, (t_bicon)printtoken, token);
-	else
-	{
-		if (!parent)
-			printf("\033[33m%10s \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
-				token_name, *(token->buffer));
-		else
-			printf("\033[34m%10s \033[31m\"\033[32m%s\033[31m\"\033[0m\n",
-				token_name, *(token->buffer));
-	}
-}
-
-void	printcommand(t_command *command)
-{
-	parse(command);
-	if (command->tokens->size)
-		lst_foreachp(command->tokens, (t_bicon)printtoken, NULL);
-	if (command->args->size)
-	{
-		lst_foreach(command->args, (t_con)print);
-		printf("\n");
-	}
-	if (command->redirect_out->size)
-	{
-		printf("> ");
-		lst_foreach(command->redirect_out, (t_con)print_redirect);
-		printf("(%s)", command->append ? "append" : "replace");
-		printf("\n");
-	}
-	if (command->redirect_in->size)
-	{
-		printf("< ");
-		lst_foreach(command->redirect_in, (t_con)print_redirect);
-		printf("\n");
-	}
-	lst_clear(command->args);
-	lst_clear(command->redirect_in);
-	lst_clear(command->redirect_out);
-	command->append = FALSE;
-	printf("---------------\n");
-}
 
 void	free_command(t_command *command)
 {
@@ -148,19 +56,12 @@ t_command	*new_command(t_list *commands)
 
 // To protect
 
-
 int	is_valid(t_token *token)
 {
 	if (token->separator)
 		if ((token->type == T_SEPARATOR || token->type == T_PIPE)
 			&& ft_strlen(*(token->buffer)) != 1)
 			return (FALSE);
-	if (token->quoted)
-	{
-		if (ft_strlen(*(token->buffer)) < 2 || (*(token->buffer))[0] !=
-			(*(token->buffer))[ft_strlen(*(token->buffer)) - 1])
-			return (FALSE);
-	}
 	if (token->type == T_REDIRECT_IN && ft_strlen(*(token->buffer)) > 1)
 		return (FALSE);
 	if (token->type == T_REDIRECT_OUT && ft_strlen(*(token->buffer)) > 2)
@@ -175,10 +76,10 @@ char	*parse_variable(char *str)
 	return (map_get(g_global.env, str));
 }
 
-int	parse_token(char **container, t_token *token)
+int	parse_token(t_token *token, char **container)
 {
 	if (token->quoted)
-		str_append(container, ft_substr(*(token->buffer), 1, ft_strlen(*(token->buffer)) - 2));
+		lst_foreachp(token->children, (t_bicon)parse_token, container);
 	else if (token->type == T_VAR)
 		str_append(container, parse_variable(*(token->buffer)));
 	else
@@ -273,7 +174,7 @@ int	parse(t_command *command)
 		else if (current->type == T_REDIRECT_IN)
 			lst = command->redirect_in;
 		else if (!current->separator)
-			parse_token(&argument, current);
+			parse_token(current, &argument);
 		space = 0;
 	}
 	if (argument)
@@ -303,7 +204,7 @@ t_list	*parse_line(char *line)
 	empty.children = tokens;
 	if (!tokenize(&empty, &line) || !validate(commands, tokens))
 		lst_clear(commands);
-	lst_foreach(commands, (t_con)printcommand);
+	// lst_foreach(commands, (t_con)printcommand);
 	lst_destroy(tokens);
 	return (commands);
 }
