@@ -66,15 +66,6 @@ struct s_token
 
 t_list		*parse_line(char *line);
 
-/*** GNL **********************************************************************/
-
-struct s_gnl_entry
-{
-	void	*next;
-	int		fd;
-	char	*content;
-};
-
 struct s_global
 {
 	char			pwd[MAXPATHLEN];
