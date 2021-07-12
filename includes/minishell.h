@@ -31,7 +31,7 @@ t_global					g_global;
 
 # define BUFF_SIZE		50
 # define ERROR			-1
-# define TOO_MANY_ARGS	-2
+# define TOO_MANY_ARGS	1
 # define NOT_VALID		-3
 # define NOT_SET		-4
 # define OLDPWD			0
@@ -70,14 +70,7 @@ int			is_valid_variable_char(char c, char *str);
 
 t_list		*parse_line(char *line);
 
-/*** GNL **********************************************************************/
-
-struct s_gnl_entry
-{
-	void	*next;
-	int		fd;
-	char	*content;
-};
+/*** Global *******************************************************************/
 
 struct s_global
 {
@@ -118,12 +111,24 @@ struct s_command
 };
 
 char		**ft_split_first(char *s, char c);
-int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 int			parse(t_command *command);
 int			tokenize(t_token *parent, char **line);
 t_token		null_token(void);
 void		free_token(t_token *token);
+
+/*** GNL **********************************************************************/
+
+struct s_gnl_entry
+{
+	void	*next;
+	int		fd;
+	char	*content;
+};
+
+char		**ft_gnl_split(char *s, char c);
+int			get_next_line(int fd, char **line);
+int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 
 /*** Modeles ******************************************************************/
 

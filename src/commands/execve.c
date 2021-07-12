@@ -73,6 +73,7 @@ void	execute_from_path(char *path, char **env_path, char **argv, char **env)
 {
 	int		i;
 	int		pid;
+	int		status;
 
 	i = -1;
 	while (env_path[++i])
@@ -86,14 +87,15 @@ void	execute_from_path(char *path, char **env_path, char **argv, char **env)
 	if (file_exists(env_path[i]))
 	{
 		pid = fork();
-		wait(NULL);
+		wait(&status);
 		if (pid == 0 && execve(path, argv, env) == ERROR)
 			execve_err();
+		g_global.cmd_ret = WEXITSTATUS(status);
 	}
 	else
 	{
 		ft_puterr2("command not found: ", path);
-		g_global.cmd_ret = errno;
+		g_global.cmd_ret = 127;
 	}
 }
 
@@ -103,15 +105,17 @@ void	do_execute(char *path, char **argv)
 	int		i;
 	char	**env_path;
 	char	**array;
+	int		status;
 
 	g_global.cmd_ret = 0;
 	array = map_as_array();
-	if (file_exists(path))
+	if (ft_strindex_of(path, '/') != -1 && file_exists(path))
 	{
 		pid = fork();
-		wait(NULL);
+		wait(&status);
 		if (pid == 0 && execve(path, argv, array) == ERROR)
 			execve_err();
+		g_global.cmd_ret = WEXITSTATUS(status);
 		return ;
 	}
 	env_path = get_env_path(path);

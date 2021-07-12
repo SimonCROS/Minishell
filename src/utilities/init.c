@@ -14,17 +14,24 @@ void	term_load(void)
 	if (tcgetattr(0, &g_global.term) == ERROR || \
 	tcgetattr(0, &g_global.save) == ERROR)
 	{
-		ft_putendl_fd(strerror(errno), 2);
-		exit(1);
+		t_list	*cmds;
+		char	*line;
+
+		if (get_next_line(0, &line) <= 0)
+			exit(1);
+		cmds = parse_line(line);
+		if (!cmds)
+			return ;
+		g_global.in_cmd = 1;
+		do_command(cmds);
+		lst_destroy(cmds);
+		free(line);
 	}
 	g_global.term.c_lflag &= ~(ICANON | ECHO);
 	g_global.term.c_cc[VMIN] = 1;
 	g_global.term.c_cc[VTIME] = 0;
 	if (tcsetattr(0, TCSANOW, &g_global.term) == ERROR)
-	{
-		ft_putendl_fd(strerror(errno), 2);
 		exit(1);
-	}
 	if (tgetent(NULL, term_name) != 1)
 		exit(1);
 }

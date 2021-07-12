@@ -24,6 +24,8 @@ SRCS		=	main.c								\
 				utilities/environ.c					\
 				utilities/init.c					\
 				utilities/put_error.c				\
+				gnl/get_next_line.c					\
+				gnl/get_next_line_utils.c			\
 				signal.c
 
 OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))

@@ -71,10 +71,12 @@ int	is_valid(t_token *token)
 
 char	*parse_variable(char *str)
 {
+	char	exit_status[100];
+
 	if (!*str)
 		return ("$");
 	if (str[0] == '?')
-		return (ft_itoa(g_global.cmd_ret));
+		return (ft_itoa_to(g_global.cmd_ret, exit_status));
 	return (map_get(g_global.env, str));
 }
 

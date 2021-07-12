@@ -49,7 +49,7 @@ void	do_cd(char **argv)
 	if (g_global.cmd_ret == ERROR)
 	{
 		ft_puterr(strerror(errno));
-		g_global.cmd_ret = errno;
+		g_global.cmd_ret = 1;
 	}
 	cd_update_env(PWD);
 }
