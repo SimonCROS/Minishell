@@ -6,7 +6,7 @@ void	do_echo(char **argv)
 
 	g_global.cmd_ret = 0;
 	endl = 1;
-	if (*argv && !ft_strcmp(*argv, "-n"))
+	while (*argv && ft_str_equals(*argv, "-n"))
 	{
 		argv++;
 		endl = 0;

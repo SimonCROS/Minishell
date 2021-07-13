@@ -32,7 +32,7 @@ t_global					g_global;
 # define BUFF_SIZE		50
 # define ERROR			-1
 # define TOO_MANY_ARGS	1
-# define NOT_VALID		-3
+# define NOT_VALID		1
 # define NOT_SET		-4
 # define OLDPWD			0
 # define PWD			1
