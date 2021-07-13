@@ -117,19 +117,6 @@ int			tokenize(t_token *parent, char **line);
 t_token		null_token(void);
 void		free_token(t_token *token);
 
-/*** GNL **********************************************************************/
-
-struct s_gnl_entry
-{
-	void	*next;
-	int		fd;
-	char	*content;
-};
-
-char		**ft_gnl_split(char *s, char c);
-int			get_next_line(int fd, char **line);
-int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
-
 /*** Modeles ******************************************************************/
 
 void		do_execute(char *path, char **argv);
@@ -171,5 +158,18 @@ void		printcommand(t_command *command);
 void		printtoken(t_token *token, t_token *parent);
 void		print_redirect(t_redirect *redirection);
 void		print(char *str);
+
+/*** GNL **********************************************************************/
+
+struct s_gnl_entry
+{
+	void	*next;
+	int		fd;
+	char	*content;
+};
+
+char		**ft_gnl_split(char *s, char c);
+int			get_next_line(int fd, char **line);
+int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 
 #endif

@@ -4,12 +4,15 @@ int	check_export_arg(char *arg)
 {
 	int		i;
 
-	i = -1;
 	if (!ft_isalpha(arg[0]) && arg[0] != '_')
 		return (FALSE);
-	while (arg[++i])
+	i = 0;
+	while (arg[i])
+	{
 		if (!ft_isalnum(arg[i]) && arg[i] != '_')
 			return (FALSE);
+		i++;
+	}
 	return (TRUE);
 }
 
