@@ -23,7 +23,7 @@ static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 {
 	t_token	*token;
 
-	if (cur && cur->type == type)
+	if (cur && cur->type == type && cur->type != T_VAR)
 		return (cur);
 	token = malloc(sizeof(t_token));
 	if (!token)
@@ -50,12 +50,12 @@ static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 
 int	is_valid_variable_char(char c, char *str)
 {
-	if (c == '$')
+	if (ft_isdigit(str[0]))
 		return (FALSE);
 	if (str[0] == '?')
 		return (FALSE);
 	if (!str[0])
-		return (ft_isalpha(c) || c == '_' || c == '?');
+		return (ft_isalnum(c) || c == '_' || c == '?');
 	else
 		return (ft_isalnum(c) || c == '_');
 }

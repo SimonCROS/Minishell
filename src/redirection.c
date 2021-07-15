@@ -4,26 +4,28 @@ int	redirect_out(t_command *cmd)
 {
 	int			out_fd;
 	t_entry		*walk;
+	t_redirect	*redirect;
 
 	if (lst_is_empty(cmd->redirect_out))
 		return (TRUE);
 	walk = cmd->redirect_out->first;
 	while (walk)
 	{
-		if (cmd->append)
-			out_fd = open(((t_redirect *)walk->value)->str, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		redirect = ((t_redirect *)walk->value);
+		if (redirect->append)
+			out_fd = open(redirect->str, O_WRONLY | O_CREAT | O_APPEND, 0644);
 		else
-			out_fd = open(((t_redirect *)walk->value)->str, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			out_fd = open(redirect->str, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (out_fd == -1)
 		{
-			ft_puterr3(((t_redirect *)walk->value)->str, ": ", strerror(errno));
+			ft_puterr3(redirect->str, ": ", strerror(errno));
 			g_global.cmd_ret = errno;
 			return (FALSE);
 		}
 		if (walk->next)
 			close(out_fd);
 		else
-			dup2(out_fd, ((t_redirect *)walk->value)->fd);
+			dup2(out_fd, redirect->fd);
 		walk = walk->next;
 	}
 	close(out_fd);
@@ -104,7 +106,11 @@ void	do_command(t_list *cmds)
 	while (iterator_has_next(&it))
 	{
 		cmd = iterator_next(&it);
-		parse(cmd);
+		if (!parse(cmd))
+		{
+			g_global.cmd_ret = 2;
+			continue ;
+		}
 		if (cmd->next_relation == T_PIPE)
 			piper(cmd, &it);
 		else

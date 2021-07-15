@@ -83,7 +83,12 @@ char	*parse_variable(char *str)
 int	parse_token(t_token *token, char **container)
 {
 	if (token->quoted)
-		lst_foreachp(token->children, (t_bicon)parse_token, container);
+	{
+		if (token->children->size)
+			lst_foreachp(token->children, (t_bicon)parse_token, container);
+		else
+			str_append(container, "");
+	}
 	else if (token->type == T_VAR)
 	{
 		// as_listf(ft_split())
@@ -117,7 +122,8 @@ int	validate(t_list *commands, t_list *tokens)
 			space = 1;
 		else
 		{
-			if (!is_valid(current) || (current->separator && !prev) || (current->separator && prev->separator))
+			if (!is_valid(current) || (current->separator && !prev) || (current->separator && prev->separator)
+			|| (current->separator && prev->type == T_REDIRECT_IN) || (current->separator && prev->type == T_REDIRECT_OUT))
 			{
 				ft_puterr3("minish: syntax error near `", *(current->buffer), "'");
 				return (FALSE);
@@ -147,11 +153,13 @@ int	parse(t_command *command)
 	t_iterator	tokens_iterator;
 	int			space;
 	t_list		*lst;
+	int			append;
 
 	space = 0;
 	lst = command->args;
 	tokens_iterator = iterator_new(command->tokens);
 	argument = NULL;
+	append = FALSE;
 	while (iterator_has_next(&tokens_iterator))
 	{
 		current = (t_token *)iterator_next(&tokens_iterator);
@@ -168,16 +176,19 @@ int	parse(t_command *command)
 				if (redirection)
 					*redirection = (t_redirect){1, argument};
 				lst_push(lst, redirection);
+				redirection->append = append;
+				append = FALSE;
 			}
 			else
 				lst_push(lst, argument);
 			argument = NULL;
 			lst = command->args;
-			if (current->type == T_REDIRECT_OUT)
-				command->append = ft_strlen(*(current->buffer)) == 2;
 		}
 		if (current->type == T_REDIRECT_OUT)
+		{
 			lst = command->redirect_out;
+			append = ft_strlen(*(current->buffer)) == 2;
+		}
 		else if (current->type == T_REDIRECT_IN)
 			lst = command->redirect_in;
 		else if (!current->separator)
@@ -192,6 +203,8 @@ int	parse(t_command *command)
 			if (redirection)
 				*redirection = (t_redirect){1, argument};
 			lst_push(lst, redirection);
+			redirection->append = append;
+			append = FALSE;
 		}
 		else
 			lst_push(lst, argument);
@@ -207,12 +220,17 @@ t_list	*parse_line(char *line)
 
 	tokens = lst_new((t_con)free_token);
 	commands = lst_new((t_con)free_command);
+	if (!commands || !tokens)
+		return (NULL);
 	empty = null_token();
 	empty.children = tokens;
 	if (!tokenize(&empty, &line) || !validate(commands, tokens))
-		lst_clear(commands);
-	// lst_foreach(commands, (t_con)printcommand);
-	// lst_clear(commands);
+	{
+		lst_destroy(tokens);
+		lst_destroy(commands);
+		// printf("MEUH\n");
+		return (NULL);
+	}
 	lst_destroy(tokens);
 	return (commands);
 }

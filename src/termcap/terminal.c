@@ -24,10 +24,13 @@ void	launch_command(t_dlist *history)
 		tcsetattr(0, TCSANOW, &g_global.save);
 		cmds = parse_line(*g_global.line);
 		if (!cmds)
-			return ;
-		g_global.in_cmd = 1;
-		do_command(cmds);
-		lst_destroy(cmds);
+			g_global.cmd_ret = 258;
+		else
+		{
+			g_global.in_cmd = 1;
+			do_command(cmds);
+			lst_destroy(cmds);
+		}
 	}
 	free(*g_global.line);
 	free(g_global.line);

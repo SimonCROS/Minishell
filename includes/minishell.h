@@ -98,13 +98,13 @@ struct s_redirect
 {
 	int		fd;
 	char	*str;
+	int		append;
 };
 
 struct s_command
 {
 	t_list			*args;
 	t_list			*tokens;
-	int				append;
 	t_list			*redirect_in;
 	t_list			*redirect_out;
 	t_token_type	next_relation;

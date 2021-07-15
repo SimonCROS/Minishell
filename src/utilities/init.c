@@ -20,12 +20,13 @@ void	term_load(void)
 		if (get_next_line(0, &line) <= 0)
 			exit(1);
 		cmds = parse_line(line);
+		free(line);
 		if (!cmds)
-			return ;
+			exit(2);
 		g_global.in_cmd = 1;
 		do_command(cmds);
 		lst_destroy(cmds);
-		free(line);
+		exit((256 + g_global.cmd_ret) % 256);
 	}
 	g_global.term.c_lflag &= ~(ICANON | ECHO);
 	g_global.term.c_cc[VMIN] = 1;
