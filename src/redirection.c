@@ -58,43 +58,59 @@ int	redirect_in(t_command *cmd)
 	return (TRUE);
 }
 
-void	piper(t_command *cmd, t_iterator *it)
-{
-	int	fd[2];
-	int	pid;
+#include <stdio.h>
+#include <sys/wait.h>
 
-	pipe(fd);
+pid_t	spawn_proc(int in, int out, t_command *cmd)
+{
+	pid_t	pid;
+
 	pid = fork();
-	if (pid != 0)
+	if (pid == 0)
 	{
-		wait(NULL);
-		dup2(fd[0], 0);
-		close(fd[1]);
-		cmd = iterator_next(it);
+		if (in != 0)
+		{
+			dup2(in, 0);
+			close(in);
+		}
+		if (out != 1)
+		{
+			dup2(out, 1);
+			close(out);
+		}
 		parse(cmd);
-		if (cmd->next_relation == T_PIPE)
-			piper(cmd, it);
-		else
-			do_redirect(cmd);
+		if (redirect_in(cmd) && redirect_out(cmd))
+			cmd_distributor((char **)as_array(cmd->args));
 	}
-	else
-	{
-		dup2(fd[1], 1);
-		close(fd[0]);
-		do_redirect(cmd);
-		exit(0);
-	}
+	return (pid);
 }
 
-int	do_redirect(t_command *cmd)
+int	prepare_command(t_command *command, int in)
 {
-	if (redirect_in(cmd) && redirect_out(cmd))
-		cmd_distributor((char **)as_array(cmd->args));
-	dup2(g_global.fd[0], 0);
-	dup2(g_global.fd[1], 1);
-	if (g_global.cmd_ret)
-		return (FALSE);
-	return (TRUE);
+	int		fd[2];
+	pid_t	pid;
+
+	pipe(fd);
+	pid = spawn_proc(in, fd[1], command);
+	if (command->next_relation != T_PIPE)
+		waitpid(pid, NULL, 0);
+	close(fd[1]);
+	in = fd[0];
+}
+
+// wait(&status);
+// g_global.cmd_ret = WEXITSTATUS(status);
+
+void	piper(t_command *command, t_iterator *it)
+{
+	int	in;
+
+	in = prepare_command(command, 0);
+	while (command->next_relation == T_PIPE)
+	{
+		command = iterator_next(it);
+		in = prepare_command(command, in);
+	}
 }
 
 void	do_command(t_list *cmds)
@@ -111,9 +127,6 @@ void	do_command(t_list *cmds)
 			g_global.cmd_ret = 2;
 			continue ;
 		}
-		if (cmd->next_relation == T_PIPE)
-			piper(cmd, &it);
-		else
-			do_redirect(cmd);
+		piper(cmd, &it);
 	}
 }

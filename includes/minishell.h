@@ -81,7 +81,6 @@ struct s_global
 	int				in_cmd;
 	struct termios	term;
 	struct termios	save;
-	int				fd[2];
 	struct winsize	wnsze;
 	char			**line;
 	int				pos;
@@ -131,7 +130,6 @@ char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
 void		cmd_distributor(char **argv);
 void		do_command(t_list *cmds);
-int			do_redirect(t_command *cmd);
 int			check_export_arg(char *arg);
 void		term_load(void);
 int			initialize(char **envp);

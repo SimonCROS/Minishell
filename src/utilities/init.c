@@ -39,8 +39,6 @@ void	term_load(void)
 
 int	initialize(char **envp)
 {
-	g_global.fd[0] = dup(0);
-	g_global.fd[1] = dup(1);
 	g_global.cmd_ret = 0;
 	load_environment(envp);
 	term_load();

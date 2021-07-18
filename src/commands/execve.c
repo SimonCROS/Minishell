@@ -1,15 +1,14 @@
 #include "minishell.h"
 
-char	**get_env_path(char *path)
+char	*get_path_from_env(char *path)
 {
-	int		i;
-	char	**env_path;
+	t_list	*paths;
 	char	*new_path;
-	char	*tmp;
-	char	*val;
+	char	*result;
+	char	*var;
 
-	val = map_get(g_global.env, "PATH");
-	if (!val)
+	var = map_get(g_global.env, "PATH");
+	if (!var)
 	{
 		errno = 2;
 		ft_puterr3(path, ": ", strerror(errno));
@@ -17,16 +16,12 @@ char	**get_env_path(char *path)
 		return (NULL);
 	}
 	new_path = ft_strjoin("/", path);
-	env_path = ft_split(val, ':');
-	i = -1;
-	while (env_path[++i])
-	{
-		tmp = ft_strjoin(env_path[i], new_path);
-		free(env_path[i]);
-		env_path[i] = tmp;
-	}
+	paths = as_listf(ft_split(var, ':'), free);
+	lst_map_in(paths, (t_map_opts){{ft_strjoin}, new_path, 1}, free);
+	result = lst_find_first(paths, file_exists);
 	free(new_path);
-	return (env_path);
+	lst_destroy(paths);
+	return (result);
 }
 
 char	*env_compose(char *key, char *value)
@@ -69,62 +64,35 @@ char	**map_as_array(void)
 	return (array);
 }
 
-void	execute_from_path(char *path, char **env_path, char **argv, char **env)
+void	free_str_array(void **str_array)
 {
-	int		i;
-	int		pid;
-	int		status;
+	int	i;
 
-	i = -1;
-	while (env_path[++i])
-	{
-		if (file_exists(env_path[i]))
-		{
-			path = env_path[i];
-			break ;
-		}
-	}
-	if (file_exists(env_path[i]))
-	{
-		pid = fork();
-		wait(&status);
-		if (pid == 0 && execve(path, argv, env) == ERROR)
-			execve_err();
-		g_global.cmd_ret = WEXITSTATUS(status);
-	}
-	else
-	{
-		ft_puterr2("command not found: ", path);
-		g_global.cmd_ret = 127;
-	}
+	if (!str_array)
+		return ;
+	i = 0;
+	while (str_array[i])
+		free(str_array[i++]);
+	free(str_array);
 }
 
 void	do_execute(char *path, char **argv)
 {
-	int		pid;
 	int		i;
-	char	**env_path;
 	char	**array;
-	int		status;
 
 	g_global.cmd_ret = 0;
 	array = map_as_array();
 	if (ft_strindex_of(path, '/') != -1 && file_exists(path))
 	{
-		pid = fork();
-		wait(&status);
-		if (pid == 0 && execve(path, argv, array) == ERROR)
-			execve_err();
-		g_global.cmd_ret = WEXITSTATUS(status);
+		execve(path, argv, array);
 		return ;
 	}
-	env_path = get_env_path(path);
-	if (!env_path)
+	path = get_path_from_env(path);
+	if (!path)
 		return ;
-	execute_from_path(path, env_path, argv, array);
-	i = -1;
-	while (array[++i])
-		free(array[i]);
-	free(array);
-	lst_destroy(as_listf((void **)env_path, free));
+	if (ft_strindex_of(path, '/') != -1 && file_exists(path))
+		execve(path, argv, array);
+	free_str_array(argv);
+	free(path);
 }
