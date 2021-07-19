@@ -12,12 +12,8 @@ void	do_pwd(char **argv)
 		return ;
 	}
 	path = getcwd(g_global.pwd, MAXPATHLEN);
-	ft_strlen(path);
 	if (path == NULL)
-	{
-		ft_puterr(strerror(errno));
-		g_global.cmd_ret = errno;
-	}
+		ft_putendl(g_global.pwd);
 	else
 		ft_putendl(path);
 }
