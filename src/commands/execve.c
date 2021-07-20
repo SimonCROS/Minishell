@@ -1,29 +1,5 @@
 #include "minishell.h"
 
-char	*get_path_from_env(char *path)
-{
-	t_list	*paths;
-	char	*new_path;
-	char	*result;
-	char	*var;
-
-	var = map_get(g_global.env, "PATH");
-	if (!var)
-	{
-		errno = 2;
-		ft_puterr3(path, ": ", strerror(errno));
-		g_global.cmd_ret = errno;
-		return (NULL);
-	}
-	new_path = ft_strjoin("/", path);
-	paths = as_listf(ft_split(var, ':'), free);
-	lst_map_in(paths, (t_map_opts){{ft_strjoin}, new_path, 1}, free);
-	result = lst_find_first(paths, file_exists);
-	free(new_path);
-	lst_destroy(paths);
-	return (result);
-}
-
 char	*env_compose(char *key, char *value)
 {
 	char	*res;
@@ -64,36 +40,14 @@ char	**map_as_array(void)
 	return (array);
 }
 
-void	free_str_array(void **str_array)
-{
-	int	i;
-
-	if (!str_array)
-		return ;
-	i = 0;
-	while (str_array[i])
-		free(str_array[i++]);
-	free(str_array);
-}
-
 void	do_execute(char *path, char **argv)
 {
 	int		i;
 	char	**array;
 
-	g_global.cmd_ret = 0;
+	if (!file_exists(path))
+		return ;
 	array = map_as_array();
-	if (ft_strindex_of(path, '/') != -1 && file_exists(path))
-	{
-		execve(path, argv, array);
-		free_str_array(argv);
-		return ;
-	}
-	path = get_path_from_env(path);
-	if (!path)
-		return ;
-	if (ft_strindex_of(path, '/') != -1 && file_exists(path))
-		execve(path, argv, array);
-	free_str_array(argv);
+	execve(path, argv, array);
 	free(path);
 }

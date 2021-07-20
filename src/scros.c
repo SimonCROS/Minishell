@@ -96,18 +96,18 @@ int	parse_token(t_token *token, char **container)
 	}
 	else if (token->type == T_VAR)
 	{
-		var_tokens = as_listf(ft_split(
+		var_tokens = as_listf((void **)ft_split(
 					parse_variable(*(token->buffer)), ' '), free);
-		index = token->index;
+		index = lst_index_of(token->parent, NULL, token);
 		it = iterator_new(var_tokens);
 		while (iterator_has_next(&it))
 		{
-			current = new_token(token->parent, T_WORD, NULL);
+			current = new_token(token->parent, T_WORD, NULL, FALSE);
 			str_append(current->buffer, iterator_next(&it));
 			lst_insert(token->parent, ++index, current);
 			if (iterator_has_next(&it))
 				lst_insert(token->parent, ++index,
-					new_token(token->parent, T_WHITESPACE, NULL));
+					new_token(token->parent, T_WHITESPACE, NULL, FALSE));
 		}
 	}
 	else
@@ -133,6 +133,7 @@ int	validate(t_list *commands, t_list *tokens)
 	while (current || !started)
 	{
 		started = 1;
+		current->parent = command->tokens;
 		lst_push(command->tokens, current);
 		if (current->type == T_WHITESPACE)
 			space = 1;

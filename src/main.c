@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-void	cmd_distributor(char **argv)
+void	built_in(char **argv)
 {
 	if (*argv != NULL)
 	{
@@ -19,9 +19,9 @@ void	cmd_distributor(char **argv)
 		else if (!ft_strcmp(*argv, "exit"))
 			do_exit(argv + 1);
 		else
-			do_execute(*argv, argv);
+			return ;
+		exit(EXIT_SUCCESS);
 	}
-	free(argv);
 }
 
 int	main(int argc, char *argv[], char *envp[])

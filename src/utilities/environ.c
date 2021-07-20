@@ -10,6 +10,8 @@ int	file_exists(char *filename)
 {
 	struct stat		buffer;
 
+	if (!filename)
+		return (FALSE);
 	return (stat(filename, &buffer) == 0);
 }
 

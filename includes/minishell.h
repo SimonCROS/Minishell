@@ -63,11 +63,10 @@ struct s_token
 	int				separator;
 	t_list			*children;
 	t_list			*parent;
-	int				index;
 };
 
 int			is_valid_variable_char(char c, char *str);
-t_token		*new_token(t_list *tokens, t_token_type type, t_token *cur);
+t_token		*new_token(t_list *tokens, t_token_type type, t_token *t, int push);
 
 /*** Parsing ******************************************************************/
 
@@ -131,7 +130,7 @@ void		do_env(char **argv);
 void		do_exit(char **argv);
 char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
-void		cmd_distributor(char **argv);
+void		built_in(char **argv);
 void		do_command(t_list *cmds);
 int			check_export_arg(char *arg);
 void		term_load(void);
