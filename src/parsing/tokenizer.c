@@ -19,7 +19,7 @@ t_token	null_token(void)
 	return ((t_token){});
 }
 
-static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
+t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 {
 	t_token	*token;
 
@@ -33,14 +33,9 @@ static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
 	token->separator = type == T_SEPARATOR || type == T_PIPE;
 	token->buffer = str_new();
 	token->children = lst_new((t_con)free_token);
-	if (!token->buffer)
-	{
-		free_token(token);
-		return (NULL);
-	}
-	if (!tokens)
-		return (token);
-	if (!lst_push(tokens, token))
+	token->parent = tokens;
+	token->index = tokens->size;
+	if (!token->buffer || !token->children || !lst_push(tokens, token))
 	{
 		free_token(token);
 		return (NULL);

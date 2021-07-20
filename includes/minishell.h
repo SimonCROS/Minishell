@@ -62,9 +62,12 @@ struct s_token
 	int				quoted;
 	int				separator;
 	t_list			*children;
+	t_list			*parent;
+	int				index;
 };
 
 int			is_valid_variable_char(char c, char *str);
+t_token		*new_token(t_list *tokens, t_token_type type, t_token *cur);
 
 /*** Parsing ******************************************************************/
 

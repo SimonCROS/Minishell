@@ -86,6 +86,7 @@ void	do_execute(char *path, char **argv)
 	if (ft_strindex_of(path, '/') != -1 && file_exists(path))
 	{
 		execve(path, argv, array);
+		free_str_array(argv);
 		return ;
 	}
 	path = get_path_from_env(path);

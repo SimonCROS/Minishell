@@ -1,0 +1,86 @@
+diff --git a/includes/minishell.h b/includes/minishell.h
+index 267790a..4362b68 100644
+--- a/includes/minishell.h
++++ b/includes/minishell.h
+@@ -62,9 +62,12 @@ struct s_token
+ 	int				quoted;
+ 	int				separator;
+ 	t_list			*children;
++	t_list			*parent;
++	int				index;
+ };
+ 
+ int			is_valid_variable_char(char c, char *str);
++t_token		*new_token(t_list *tokens, t_token_type type, t_token *cur);
+ 
+ /*** Parsing ******************************************************************/
+ 
+diff --git a/src/parsing/tokenizer.c b/src/parsing/tokenizer.c
+index 23ec913..0183939 100644
+--- a/src/parsing/tokenizer.c
++++ b/src/parsing/tokenizer.c
+@@ -19,7 +19,7 @@ t_token	null_token(void)
+ 	return ((t_token){});
+ }
+ 
+-static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
++t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
+ {
+ 	t_token	*token;
+ 
+@@ -33,14 +33,9 @@ static t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur)
+ 	token->separator = type == T_SEPARATOR || type == T_PIPE;
+ 	token->buffer = str_new();
+ 	token->children = lst_new((t_con)free_token);
+-	if (!token->buffer)
+-	{
+-		free_token(token);
+-		return (NULL);
+-	}
+-	if (!tokens)
+-		return (token);
+-	if (!lst_push(tokens, token))
++	token->parent = tokens;
++	token->index = tokens->size;
++	if (!token->buffer || !token->children || !lst_push(tokens, token))
+ 	{
+ 		free_token(token);
+ 		return (NULL);
+diff --git a/src/scros.c b/src/scros.c
+index 8ecb614..4dcc9b4 100644
+--- a/src/scros.c
++++ b/src/scros.c
+@@ -82,6 +82,11 @@ char	*parse_variable(char *str)
+ 
+ int	parse_token(t_token *token, char **container)
+ {
++	t_list		*var_tokens;
++	t_token		*current;
++	int			index;
++	t_iterator	it;
++
+ 	if (token->quoted)
+ 	{
+ 		if (token->children->size)
+@@ -91,8 +96,19 @@ int	parse_token(t_token *token, char **container)
+ 	}
+ 	else if (token->type == T_VAR)
+ 	{
+-		// as_listf(ft_split())
+-		str_append(container, parse_variable(*(token->buffer)));
++		var_tokens = as_listf(ft_split(
++					parse_variable(*(token->buffer)), ' '), free);
++		index = token->index;
++		it = iterator_new(var_tokens);
++		while (iterator_has_next(&it))
++		{
++			current = new_token(token->parent, T_WORD, NULL);
++			str_append(current->buffer, iterator_next(&it));
++			lst_insert(token->parent, ++index, current);
++			if (iterator_has_next(&it))
++				lst_insert(token->parent, ++index,
++					new_token(token->parent, T_WHITESPACE, NULL));
++		}
+ 	}
+ 	else
+ 		str_append(container, *(token->buffer));

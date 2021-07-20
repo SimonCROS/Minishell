@@ -82,6 +82,11 @@ char	*parse_variable(char *str)
 
 int	parse_token(t_token *token, char **container)
 {
+	t_list		*var_tokens;
+	t_token		*current;
+	int			index;
+	t_iterator	it;
+
 	if (token->quoted)
 	{
 		if (token->children->size)
@@ -91,8 +96,19 @@ int	parse_token(t_token *token, char **container)
 	}
 	else if (token->type == T_VAR)
 	{
-		// as_listf(ft_split())
-		str_append(container, parse_variable(*(token->buffer)));
+		var_tokens = as_listf(ft_split(
+					parse_variable(*(token->buffer)), ' '), free);
+		index = token->index;
+		it = iterator_new(var_tokens);
+		while (iterator_has_next(&it))
+		{
+			current = new_token(token->parent, T_WORD, NULL);
+			str_append(current->buffer, iterator_next(&it));
+			lst_insert(token->parent, ++index, current);
+			if (iterator_has_next(&it))
+				lst_insert(token->parent, ++index,
+					new_token(token->parent, T_WHITESPACE, NULL));
+		}
 	}
 	else
 		str_append(container, *(token->buffer));
