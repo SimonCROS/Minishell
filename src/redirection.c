@@ -67,7 +67,6 @@ void	piper(t_command *cmd, t_iterator *it)
 	pid = fork();
 	if (pid != 0)
 	{
-		wait(NULL);
 		dup2(fd[0], 0);
 		close(fd[1]);
 		cmd = iterator_next(it);
@@ -76,6 +75,8 @@ void	piper(t_command *cmd, t_iterator *it)
 			piper(cmd, it);
 		else
 			do_redirect(cmd);
+		close(fd[0]);
+		wait(NULL);
 	}
 	else
 	{
