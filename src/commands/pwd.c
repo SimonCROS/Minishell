@@ -7,7 +7,7 @@ void	do_pwd(char **argv)
 	if (argv[0] != NULL)
 	{
 		ft_puterr("pwd: too many arguments");
-		exit(TOO_MANY_ARGS);
+		g_global.cmd_ret = TOO_MANY_ARGS;
 	}
 	path = getcwd(g_global.pwd, MAXPATHLEN);
 	if (path == NULL)

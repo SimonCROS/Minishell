@@ -88,6 +88,7 @@ struct s_global
 	int				pos;
 	char			*line_cpy;
 	t_dentry		*history;
+	int				fd[2];
 };
 
 // to rm
@@ -130,7 +131,7 @@ void		do_env(char **argv);
 void		do_exit(char **argv);
 char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
-void		built_in(char **argv);
+int			built_in(char **argv, int forked);
 void		do_command(t_list *cmds);
 int			check_export_arg(char *arg);
 void		term_load(void);

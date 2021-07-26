@@ -110,6 +110,8 @@ int	parse_token(t_token *token, char **container)
 					new_token(token->parent, T_WHITESPACE, NULL, FALSE));
 		}
 	}
+	else if (token->type == T_WHITESPACE)
+		str_append(container, " ");
 	else
 		str_append(container, *(token->buffer));
 	return (TRUE);

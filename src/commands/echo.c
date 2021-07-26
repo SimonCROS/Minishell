@@ -4,7 +4,6 @@ void	do_echo(char **argv)
 {
 	int		endl;
 
-	g_global.cmd_ret = 0;
 	endl = 1;
 	while (*argv && ft_str_equals(*argv, "-n"))
 	{

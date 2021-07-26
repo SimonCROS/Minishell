@@ -73,7 +73,6 @@ void	do_export(char **argv)
 {
 	int		i;
 
-	g_global.cmd_ret = 0;
 	if (!*argv)
 		print_export();
 	i = -1;

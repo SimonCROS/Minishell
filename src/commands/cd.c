@@ -51,7 +51,6 @@ void	cd_redirect_home(void)
 
 void	do_cd(char **argv)
 {
-	g_global.cmd_ret = 0;
 	cd_update_env(OLDPWD);
 	if (argv[0] == NULL)
 		cd_redirect_home();

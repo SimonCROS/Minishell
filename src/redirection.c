@@ -58,9 +58,6 @@ int	redirect_in(t_command *cmd)
 	return (TRUE);
 }
 
-#include <stdio.h>
-#include <sys/wait.h>
-
 void	free_str_array(void **str_array)
 {
 	int	i;
@@ -81,8 +78,10 @@ char	*get_path_from_env(char *path)
 	char	*var;
 
 	var = map_get(g_global.env, "PATH");
-	if (!var)
+	if (!var || ft_strindex_of(path, '/') != -1)
 	{
+		if (file_exists(path))
+			return (path);
 		errno = 2;
 		ft_puterr3(path, ": ", strerror(errno));
 		g_global.cmd_ret = errno;
@@ -94,6 +93,13 @@ char	*get_path_from_env(char *path)
 	result = ft_strdup(lst_find_first(paths, (t_pre)file_exists));
 	free(new_path);
 	lst_destroy(paths);
+	if (!result)
+	{
+		errno = 127;
+		ft_puterr3(path, ": ", "command not found");
+		g_global.cmd_ret = errno;
+		return (NULL);
+	}
 	return (result);
 }
 
@@ -108,7 +114,7 @@ int	launch_command2(t_command *cmd)
 	path = get_path_from_env(argv[0]);
 	if (argv && redirect_in(cmd) && redirect_out(cmd))
 	{
-		built_in(argv);
+		built_in(argv, TRUE);
 		if (!file_exists(path))
 			exit(127);
 		return (do_execute(path, argv));
@@ -154,21 +160,47 @@ int	fork_pipes(t_iterator *it)
 		if (cmd->next_relation != T_PIPE)
 			break ;
 		pipe(fd);
-		puts("mêêêê");
 		spawn_proc(in, fd[1], cmd);
 		close(fd[1]);
 		in = fd[0];
 	}
 	if (in != 0)
 		dup2(in, 0);
-	puts("hihan");
 	return (launch_command2(cmd));
+}
+
+int	launch_built_in(t_iterator *it)
+{
+	t_command	*command;
+	char		**argv;
+
+	if (it->current)
+		command = it->current->value;
+	else if (it->list->first)
+		command = it->list->first->value;
+	if (!command || command->next_relation == T_PIPE)
+		return (FALSE);
+	parse(command);
+	argv = (char **)as_array(command->args);
+	if (argv && redirect_in(command) && redirect_out(command)
+		&& built_in(argv, FALSE))
+	{
+		dup2(g_global.fd[0], 0);
+		dup2(g_global.fd[1], 1);
+		free(argv);
+		iterator_next(it);
+		return (TRUE);
+	}
+	dup2(g_global.fd[0], 0);
+	dup2(g_global.fd[1], 1);
+	lst_clear(command->args);
+	free(argv);
+	return (FALSE);
 }
 
 void	do_command(t_list *cmds)
 {
 	t_iterator	it;
-	t_command	*cmd;
 	int			status;
 	int			pid;
 
@@ -176,19 +208,18 @@ void	do_command(t_list *cmds)
 	it = iterator_new(cmds);
 	while (iterator_has_next(&it))
 	{
+		if (launch_built_in(&it))
+			continue ;
 		pid = fork();
 		if (pid == -1)
 			break ;
 		if (!pid)
 		{
-			puts("miaw");
 			fork_pipes(&it);
 			exit(127);
 		}
-		puts("meuh");
 		while (wait(&status) != pid)
-			puts("aaa");
-		puts("issou");
+			;
 		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)
 			;
 		g_global.cmd_ret = WEXITSTATUS(status);
