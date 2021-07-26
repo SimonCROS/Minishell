@@ -2,17 +2,33 @@
 
 void	cd_update_env(int variable)
 {
+	char	*path;
+
 	if (variable == OLDPWD)
 	{
+		path = getcwd(g_global.oldpwd, MAXPATHLEN);
 		if (map_contains_key(g_global.env, "OLDPWD"))
-			map_replace(g_global.env, "OLDPWD", \
-			ft_strdup(getcwd(g_global.oldpwd, MAXPATHLEN)));
+		{
+			if (path)
+				map_replace(g_global.env, "OLDPWD", \
+				ft_strdup(path));
+			else
+				map_replace(g_global.env, "OLDPWD", \
+				ft_strdup(g_global.pwd));
+		}
 	}
 	else if (variable == PWD)
 	{
+		path = getcwd(g_global.pwd, MAXPATHLEN);
 		if (map_contains_key(g_global.env, "PWD"))
-			map_replace(g_global.env, "PWD", \
-			ft_strdup(getcwd(g_global.pwd, MAXPATHLEN)));
+		{
+			if (path)
+				map_replace(g_global.env, "PWD", \
+				ft_strdup(path));
+			else
+				map_replace(g_global.env, "PWD", \
+				ft_strdup(g_global.pwd));
+		}
 	}
 }
 
