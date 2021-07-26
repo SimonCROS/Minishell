@@ -17,7 +17,7 @@ void	signal_interupt(void)
 		g_global.cmd_ret = 1;
 	free(*g_global.line);
 	free(g_global.line);
-	free(g_global.line_cpy);
+	// free(g_global.line_cpy);
 	g_global.line_cpy = NULL;
 	g_global.history = NULL;
 	tputs(save_cursor, 1, (int (*)(int))ft_putchar);
