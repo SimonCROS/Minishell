@@ -40,14 +40,13 @@ char	**map_as_array(void)
 	return (array);
 }
 
-void	do_execute(char *path, char **argv)
+int	do_execute(char *path, char **argv)
 {
 	int		i;
 	char	**array;
 
 	if (!file_exists(path))
-		return ;
+		return (127);
 	array = map_as_array();
-	execve(path, argv, array);
-	free(path);
+	return (execve(path, argv, array));
 }

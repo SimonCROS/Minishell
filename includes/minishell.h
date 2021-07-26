@@ -120,7 +120,7 @@ void		free_token(t_token *token);
 
 /*** Modeles ******************************************************************/
 
-void		do_execute(char *path, char **argv);
+int			do_execute(char *path, char **argv);
 void		do_pwd(char **argv);
 void		do_cd(char **argv);
 void		do_echo(char **argv);

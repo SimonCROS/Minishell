@@ -89,98 +89,108 @@ char	*get_path_from_env(char *path)
 		return (NULL);
 	}
 	new_path = ft_strjoin("/", path);
-	paths = as_listf(ft_split(var, ':'), free);
-	lst_map_in(paths, (t_map_opts){{ft_strjoin}, new_path, 1}, free);
-	result = ft_strdup(lst_find_first(paths, file_exists));
+	paths = as_listf((void **)ft_split(var, ':'), free);
+	lst_map_in(paths, (t_map_opts){ft_strjoin, new_path, 1}, free);
+	result = ft_strdup(lst_find_first(paths, (t_pre)file_exists));
 	free(new_path);
 	lst_destroy(paths);
 	return (result);
 }
 
-pid_t	spawn_proc(int in, int out, t_command *cmd)
+int	launch_command2(t_command *cmd)
 {
-	int		status;
-	pid_t	pid;
-	char	*path;
 	char	**argv;
+	char	*path;
 
+	if (!parse(cmd))
+		exit(2);
 	argv = (char **)as_array(cmd->args);
-	path = argv[0];
-	if (ft_strindex_of(path, '/') == -1)
-		path = get_path_from_env(path);
-	if (!path)
-		return (-1); // free
-	pid = fork();
-	if (pid == 0)
+	path = get_path_from_env(argv[0]);
+	if (argv && redirect_in(cmd) && redirect_out(cmd))
 	{
-		// if (in != 0)
-		// {
-		// 	dup2(in, 0);
-		// 	close(in);
-		// }
-		// if (out != 1)
-		// {
-		// 	dup2(out, 1);
-		// 	close(out);
-		// }
-		parse(cmd);
-		if (redirect_in(cmd) && redirect_out(cmd))
-		{
-			built_in(argv);
-			if (!file_exists(path))
-				exit(127);
-			do_execute(path, argv);
-			exit(EXIT_SUCCESS);
-		}
-		exit(EXIT_FAILURE);
+		built_in(argv);
+		if (!file_exists(path))
+			exit(127);
+		return (do_execute(path, argv));
 	}
-	// free(argv);
-	waitpid(pid, &status, 0);
-	g_global.cmd_ret = WEXITSTATUS(status);
+	exit(EXIT_FAILURE);
+}
+
+int	spawn_proc(int in, int out, t_command *cmd)
+{
+	pid_t	pid;
+
+	pid = fork();
+	if (pid == -1)
+		exit(EXIT_FAILURE);
+	if (pid)
+	{
+		if (in != 0)
+		{
+			dup2(in, 0);
+			close(in);
+		}
+		if (out != 1)
+		{
+			dup2(out, 1);
+			close(out);
+		}
+		return (launch_command2(cmd));
+	}
 	return (pid);
 }
 
-int	prepare_command(t_command *command, int in)
+int	fork_pipes(t_iterator *it)
 {
-	int		fd[2];
-	pid_t	pid;
+	t_command	*cmd;
+	pid_t		pid;
+	int			in;
+	int			fd[2];
 
-	// pipe(fd);
-	pid = spawn_proc(in, 0, command);
-	// if (command->next_relation != T_PIPE)
-	// 	waitpid(pid, NULL, 0);
-	// close(fd[1]);
-	// in = fd[0];
-	return (0);
-}
-
-void	piper(t_command *command, t_iterator *it)
-{
-	int	in;
-
-	in = prepare_command(command, 0);
-	// while (command->next_relation == T_PIPE)
-	// {
-		// command = iterator_next(it);
-		// in = prepare_command(command, in);
-	// }
+	in = 0;
+	while (iterator_has_next(it))
+	{
+		cmd = iterator_next(it);
+		if (cmd->next_relation != T_PIPE)
+			break ;
+		pipe(fd);
+		puts("mêêêê");
+		spawn_proc(in, fd[1], cmd);
+		close(fd[1]);
+		in = fd[0];
+	}
+	if (in != 0)
+		dup2(in, 0);
+	puts("hihan");
+	return (launch_command2(cmd));
 }
 
 void	do_command(t_list *cmds)
 {
 	t_iterator	it;
 	t_command	*cmd;
+	int			status;
+	int			pid;
 
 	g_global.cmd_ret = 0;
 	it = iterator_new(cmds);
 	while (iterator_has_next(&it))
 	{
-		cmd = iterator_next(&it);
-		if (!parse(cmd))
+		pid = fork();
+		if (pid == -1)
+			break ;
+		if (!pid)
 		{
-			g_global.cmd_ret = 2;
-			continue ;
+			puts("miaw");
+			fork_pipes(&it);
+			exit(127);
 		}
-		piper(cmd, &it);
+		puts("meuh");
+		while (wait(&status) != pid)
+			puts("aaa");
+		puts("issou");
+		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)
+			;
+		g_global.cmd_ret = WEXITSTATUS(status);
 	}
 }
