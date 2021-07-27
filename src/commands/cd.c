@@ -1,38 +1,25 @@
 #include "minishell.h"
 
-void	cd_update_env(int variable)
+static void	cd_update_env(char	*variable)
 {
 	char	*path;
 
-	if (variable == OLDPWD)
-	{
+	if (ft_str_equals(variable, "OLDPWD"))
 		path = getcwd(g_global.oldpwd, MAXPATHLEN);
-		if (map_contains_key(g_global.env, "OLDPWD"))
-		{
-			if (path)
-				map_replace(g_global.env, "OLDPWD", \
-				ft_strdup(path));
-			else
-				map_replace(g_global.env, "OLDPWD", \
-				ft_strdup(g_global.pwd));
-		}
-	}
-	else if (variable == PWD)
-	{
+	else
 		path = getcwd(g_global.pwd, MAXPATHLEN);
-		if (map_contains_key(g_global.env, "PWD"))
-		{
-			if (path)
-				map_replace(g_global.env, "PWD", \
-				ft_strdup(path));
-			else
-				map_replace(g_global.env, "PWD", \
-				ft_strdup(g_global.pwd));
-		}
-	}
+	if (map_contains_key(g_global.env, variable))
+	{
+		if (path)
+			map_replace(g_global.env, variable, \
+			ft_strdup(path));
+		else
+			map_replace(g_global.env, variable, \
+			ft_strdup(g_global.pwd));
+	}	
 }
 
-void	cd_redirect_home(void)
+static void	cd_redirect_home(void)
 {
 	char	path[MAXPATHLEN];
 	char	*home;
@@ -51,7 +38,7 @@ void	cd_redirect_home(void)
 
 void	do_cd(char **argv)
 {
-	cd_update_env(OLDPWD);
+	cd_update_env("OLDPWD");
 	if (argv[0] == NULL)
 		cd_redirect_home();
 	else if (argv[1] != NULL)
@@ -66,5 +53,5 @@ void	do_cd(char **argv)
 		ft_puterr(strerror(errno));
 		g_global.cmd_ret = 1;
 	}
-	cd_update_env(PWD);
+	cd_update_env("PWD");
 }

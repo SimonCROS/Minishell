@@ -8,6 +8,7 @@ LIBFT		= $(LIBFT_DIR)/libft.a
 SRCS		=	main.c								\
 				scros.c								\
 				redirection.c						\
+				piper.c								\
 				parsing/tokenizer.c					\
 				parsing/debuger.c					\
 				commands/cd.c						\
