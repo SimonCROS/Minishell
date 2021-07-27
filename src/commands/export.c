@@ -28,6 +28,33 @@ static void	print_export(void)
 	map_free(sort);
 }
 
+static void	export_variable2(char *str, int len, char *value, int append)
+{
+	if (len != -1)
+	{
+		if (map_contains_key(g_global.env, str))
+		{
+			if (!append)
+				map_replace(g_global.env, ft_substr(str, 0, len), \
+				ft_strdup(value));
+			else
+			{
+				if (!map_get(g_global.env, str))
+					map_replace(g_global.env, ft_substr(str, 0, len), \
+					ft_strdup(value));
+				else
+					map_replace(g_global.env, ft_substr(str, 0, len), \
+					ft_strjoin(map_get(g_global.env, str), value));
+			}
+		}
+		else
+			map_put(g_global.env, ft_substr(str, 0, len), ft_strdup(value));
+	}
+	else
+		if (!map_contains_key(g_global.env, str))
+			map_put(g_global.env, ft_substr(str, 0, len), NULL);
+}
+
 static void	export_variable(char *str)
 {
 	int		append;
@@ -47,26 +74,7 @@ static void	export_variable(char *str)
 		g_global.cmd_ret = NOT_VALID;
 		return ;
 	}
-	if (len != -1)
-	{
-		if (map_contains_key(g_global.env, str))
-		{
-			if (!append)
-				map_replace(g_global.env, ft_substr(str, 0, len), ft_strdup(value));
-			else
-			{
-				if (!map_get(g_global.env, str))
-					map_replace(g_global.env, ft_substr(str, 0, len), ft_strdup(value));
-				else
-					map_replace(g_global.env, ft_substr(str, 0, len), ft_strjoin(map_get(g_global.env, str), value));
-			}
-		}
-		else
-			map_put(g_global.env, ft_substr(str, 0, len), ft_strdup(value));
-	}
-	else
-		if (!map_contains_key(g_global.env, str))
-			map_put(g_global.env, ft_substr(str, 0, len), NULL);
+	export_variable2(str, len, value, append);
 }
 
 void	do_export(char **argv)

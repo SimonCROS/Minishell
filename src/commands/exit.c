@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-int	strisnum(char *str)
+static int	strisnum(char *str)
 {
 	int		i;
 	long	num;

@@ -18,7 +18,7 @@ char	*env_compose(char *key, char *value)
 	return (res);
 }
 
-char	**map_as_array(void)
+static char	**map_as_array(void)
 {
 	t_citerator		iter;
 	t_mapentry		*elem;

@@ -54,5 +54,7 @@ dkms.conf
 # Misc
 minishell
 tester
+printargs.c
+test.c
 .vscode
 .DS_Store

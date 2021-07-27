@@ -38,7 +38,8 @@ t_command	*new_command(t_list *commands)
 	command->args = lst_new(free);
 	command->redirect_in = lst_new((t_con)free_redirect);
 	command->redirect_out = lst_new((t_con)free_redirect);
-	if (!command->children || !command->args || !command->redirect_in || !command->redirect_out)
+	if (!command->children || !command->args || !command->redirect_in \
+	|| !command->redirect_out)
 	{
 		free_command(command);
 		return (NULL);
@@ -69,7 +70,7 @@ int	is_valid(t_token *token)
 	return (TRUE);
 }
 
-char	*parse_variable(char *str)
+char	*translate_var(char *str)
 {
 	char	exit_status[100];
 
@@ -78,7 +79,7 @@ char	*parse_variable(char *str)
 	return (map_get(g_global.env, str));
 }
 
-void	parse_token(t_token *token, char **container)
+static void	parse_variable(t_token *token, char **container)
 {
 	char		exit_status[100];
 	t_list		*var_tokens;
@@ -86,6 +87,36 @@ void	parse_token(t_token *token, char **container)
 	int			index;
 	t_iterator	it;
 
+	if (**token->buffer == '?')
+	{
+		ft_itoa_to(g_global.cmd_ret, exit_status);
+		str_append(container, exit_status);
+		return ;
+	}
+	if (token->parent->quoted)
+	{
+		str_append(container, translate_var(*token->buffer));
+		return ;
+	}
+	var_tokens = as_listf((void **)ft_split(
+				translate_var(*token->buffer), ' '), free);
+	if (!var_tokens)
+		return ;
+	index = lst_index_of(token->parent->children, NULL, token);
+	it = iterator_new(var_tokens);
+	while (iterator_has_next(&it))
+	{
+		current = new_token(token->parent, T_WORD, NULL, FALSE);
+		str_append(current->buffer, iterator_next(&it));
+		lst_insert(token->parent->children, ++index, current);
+		if (iterator_has_next(&it))
+			lst_insert(token->parent->children, ++index,
+				new_token(token->parent, T_WHITESPACE, NULL, FALSE));
+	}
+}
+
+void	parse_token(t_token *token, char **container)
+{
 	if (token->quoted)
 	{
 		if (token->children->size)
@@ -94,81 +125,54 @@ void	parse_token(t_token *token, char **container)
 			str_append(container, "");
 	}
 	else if (token->type == T_VAR)
-	{
-		if (**token->buffer == '?')
-		{
-			ft_itoa_to(g_global.cmd_ret, exit_status);
-			str_append(container, exit_status);
-			return ;
-		}
-		if (token->parent->quoted)
-		{
-			str_append(container, parse_variable(*token->buffer));
-			return ;
-		}
-		var_tokens = as_listf((void **)ft_split(
-					parse_variable(*token->buffer), ' '), free);
-		if (!var_tokens)
-			return ;
-		index = lst_index_of(token->parent->children, NULL, token);
-		it = iterator_new(var_tokens);
-		while (iterator_has_next(&it))
-		{
-			current = new_token(token->parent, T_WORD, NULL, FALSE);
-			str_append(current->buffer, iterator_next(&it));
-			lst_insert(token->parent->children, ++index, current);
-			if (iterator_has_next(&it))
-				lst_insert(token->parent->children, ++index,
-					new_token(token->parent, T_WHITESPACE, NULL, FALSE));
-		}
-	}
+		parse_variable(token, container);
 	else if (token->type == T_WHITESPACE)
 		str_append(container, " ");
 	else
 		str_append(container, *token->buffer);
 }
 
-int	validate(t_list *commands, t_list *tokens)
+int	validate(t_list *commands, t_list *tokens, int started)
 {
 	char		*argument;
 	t_token		*prev;
-	t_token		*current;
+	t_token		*cur;
 	t_command	*command;
 	int			space;
-	int			started;
 
-	started = 0;
 	prev = NULL;
 	space = 0;
 	command = new_command(commands);
 	argument = NULL;
-	current = (t_token *)lst_shift(tokens);
-	while (current || !started)
+	cur = (t_token *)lst_shift(tokens);
+	while (cur || !started)
 	{
 		started = 1;
-		current->parent = (t_token *)command;
-		lst_push(command->children, current);
-		if (current->type == T_WHITESPACE)
+		cur->parent = (t_token *)command;
+		lst_push(command->children, cur);
+		if (cur->type == T_WHITESPACE)
 			space = 1;
 		else
 		{
-			if (!is_valid(current) || (current->separator && !prev) || (current->separator && prev->separator)
-			|| (current->separator && prev->type == T_REDIRECT_IN) || (current->separator && prev->type == T_REDIRECT_OUT))
+			if (!is_valid(cur) || (cur->separator && !prev) || (cur->separator \
+			&& prev->separator) || (cur->separator && prev->type == \
+			T_REDIRECT_IN) || (cur->separator && prev->type == T_REDIRECT_OUT))
 			{
-				ft_puterr3("minish: syntax error near `", *(current->buffer), "'");
+				ft_puterr3("minish: syntax error near `", *(cur->buffer), "'");
 				return (FALSE);
 			}
-			if (current->separator)
+			if (cur->separator)
 			{
-				command->next_relation = current->type;
+				command->next_relation = cur->type;
 				command = new_command(commands);
 			}
-			prev = current;
+			prev = cur;
 			space = 0;
 		}
-		current = (t_token *)lst_shift(tokens);
+		cur = (t_token *)lst_shift(tokens);
 	}
-	if (prev && (prev->type == T_REDIRECT_IN || prev->type == T_REDIRECT_OUT || prev->type == T_PIPE))
+	if (prev && (prev->type == T_REDIRECT_IN || prev->type == T_REDIRECT_OUT \
+	|| prev->type == T_PIPE))
 	{
 		ft_putendl_fd("minish: syntax error: unexpected end of file", 2);
 		return (FALSE);
@@ -198,7 +202,8 @@ int	parse(t_command *command)
 			space = 1;
 			continue ;
 		}
-		if ((current->separator || current->type == T_REDIRECT_IN || current->type == T_REDIRECT_OUT || space) && argument)
+		if ((current->separator || current->type == T_REDIRECT_IN || \
+		current->type == T_REDIRECT_OUT || space) && argument)
 		{
 			if (lst == command->redirect_in || lst == command->redirect_out)
 			{
@@ -254,7 +259,7 @@ t_list	*parse_line(char *line)
 		return (NULL);
 	empty = null_token();
 	empty.children = tokens;
-	if (!tokenize(&empty, &line) || !validate(commands, tokens))
+	if (!tokenize(&empty, &line) || !validate(commands, tokens, 0))
 	{
 		lst_destroy(tokens);
 		lst_destroy(commands);

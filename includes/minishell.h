@@ -34,10 +34,9 @@ t_global					g_global;
 # define TOO_MANY_ARGS	1
 # define NOT_VALID		1
 # define NOT_SET		-4
-# define OLDPWD			0
-# define PWD			1
 # define CTRL_D			"\4"
 # define PROMPT			"minishell> "
+# define CONTINUE		2
 
 /*** Tokenizer ****************************************************************/
 
@@ -120,6 +119,8 @@ char		**ft_split_first(char *s, char c);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 int			parse(t_command *command);
 int			tokenize(t_token *parent, char **line);
+int			token1(t_token	**cur, char c, int escaped, t_token *parent);
+int			token2(t_token	**cur, char c, char **line, t_token *parent);
 t_token		null_token(void);
 void		free_token(t_token *token);
 
@@ -142,7 +143,10 @@ void		term_load(void);
 int			initialize(char **envp);
 void		signal_handler(int sig);
 void		terminal(int prompt_size);
+char		*get_path_from_env(char *path);
 int			file_exists(char *filename);
+int			redirect_in(t_command *cmd);
+int			redirect_out(t_command *cmd);
 
 void		execve_err(void);
 void		ft_puterr(char *a);

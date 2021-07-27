@@ -76,7 +76,6 @@ void	printcommand(t_command *command)
 	{
 		printf("> ");
 		lst_foreach(command->redirect_out, (t_con)print_redirect);
-		// printf("(%s)", command->append ? "append" : "replace");
 		printf("\n");
 	}
 	if (command->redirect_in->size)
