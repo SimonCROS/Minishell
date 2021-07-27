@@ -4,7 +4,7 @@ void	free_command(t_command *command)
 {
 	if (command)
 	{
-		lst_destroy(command->tokens);
+		lst_destroy(command->children);
 		lst_destroy(command->args);
 		lst_destroy(command->redirect_out);
 		lst_destroy(command->redirect_in);
@@ -31,14 +31,14 @@ t_command	*new_command(t_list *commands)
 {
 	t_command	*command;
 
-	command = malloc(sizeof(t_command));
+	command = calloc(1, sizeof(t_command));
 	if (!command)
 		return (NULL);
-	command->tokens = lst_new((t_consumer)free_token);
+	command->children = lst_new((t_consumer)free_token);
 	command->args = lst_new(free);
 	command->redirect_in = lst_new((t_con)free_redirect);
 	command->redirect_out = lst_new((t_con)free_redirect);
-	if (!command->tokens || !command->args || !command->redirect_in || !command->redirect_out)
+	if (!command->children || !command->args || !command->redirect_in || !command->redirect_out)
 	{
 		free_command(command);
 		return (NULL);
@@ -60,11 +60,11 @@ int	is_valid(t_token *token)
 {
 	if (token->separator)
 		if ((token->type == T_SEPARATOR || token->type == T_PIPE)
-			&& ft_strlen(*(token->buffer)) != 1)
+			&& ft_strlen(*token->buffer) != 1)
 			return (FALSE);
-	if (token->type == T_REDIRECT_IN && ft_strlen(*(token->buffer)) > 1)
+	if (token->type == T_REDIRECT_IN && ft_strlen(*token->buffer) > 1)
 		return (FALSE);
-	if (token->type == T_REDIRECT_OUT && ft_strlen(*(token->buffer)) > 2)
+	if (token->type == T_REDIRECT_OUT && ft_strlen(*token->buffer) > 2)
 		return (FALSE);
 	return (TRUE);
 }
@@ -75,13 +75,12 @@ char	*parse_variable(char *str)
 
 	if (!*str)
 		return ("$");
-	if (str[0] == '?')
-		return (ft_itoa_to(g_global.cmd_ret, exit_status));
 	return (map_get(g_global.env, str));
 }
 
-int	parse_token(t_token *token, char **container)
+void	parse_token(t_token *token, char **container)
 {
+	char		exit_status[100];
 	t_list		*var_tokens;
 	t_token		*current;
 	int			index;
@@ -96,25 +95,37 @@ int	parse_token(t_token *token, char **container)
 	}
 	else if (token->type == T_VAR)
 	{
+		if (**token->buffer == '?')
+		{
+			ft_itoa_to(g_global.cmd_ret, exit_status);
+			str_append(container, exit_status);
+			return ;
+		}
+		if (token->parent->quoted)
+		{
+			str_append(container, parse_variable(*token->buffer));
+			return ;
+		}
 		var_tokens = as_listf((void **)ft_split(
-					parse_variable(*(token->buffer)), ' '), free);
-		index = lst_index_of(token->parent, NULL, token);
+					parse_variable(*token->buffer), ' '), free);
+		if (!var_tokens)
+			return ;
+		index = lst_index_of(token->parent->children, NULL, token);
 		it = iterator_new(var_tokens);
 		while (iterator_has_next(&it))
 		{
 			current = new_token(token->parent, T_WORD, NULL, FALSE);
 			str_append(current->buffer, iterator_next(&it));
-			lst_insert(token->parent, ++index, current);
+			lst_insert(token->parent->children, ++index, current);
 			if (iterator_has_next(&it))
-				lst_insert(token->parent, ++index,
+				lst_insert(token->parent->children, ++index,
 					new_token(token->parent, T_WHITESPACE, NULL, FALSE));
 		}
 	}
 	else if (token->type == T_WHITESPACE)
 		str_append(container, " ");
 	else
-		str_append(container, *(token->buffer));
-	return (TRUE);
+		str_append(container, *token->buffer);
 }
 
 int	validate(t_list *commands, t_list *tokens)
@@ -135,8 +146,8 @@ int	validate(t_list *commands, t_list *tokens)
 	while (current || !started)
 	{
 		started = 1;
-		current->parent = command->tokens;
-		lst_push(command->tokens, current);
+		current->parent = (t_token *)command;
+		lst_push(command->children, current);
 		if (current->type == T_WHITESPACE)
 			space = 1;
 		else
@@ -176,7 +187,7 @@ int	parse(t_command *command)
 
 	space = 0;
 	lst = command->args;
-	tokens_iterator = iterator_new(command->tokens);
+	tokens_iterator = iterator_new(command->children);
 	argument = NULL;
 	append = FALSE;
 	while (iterator_has_next(&tokens_iterator))
@@ -247,7 +258,6 @@ t_list	*parse_line(char *line)
 	{
 		lst_destroy(tokens);
 		lst_destroy(commands);
-		// printf("MEUH\n");
 		return (NULL);
 	}
 	lst_destroy(tokens);

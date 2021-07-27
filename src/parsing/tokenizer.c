@@ -19,7 +19,7 @@ t_token	null_token(void)
 	return ((t_token){});
 }
 
-t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur, int p)
+t_token	*new_token(t_token *parent, t_token_type type, t_token *cur, int p)
 {
 	t_token	*token;
 
@@ -33,8 +33,9 @@ t_token	*new_token(t_list *tokens, t_token_type type, t_token *cur, int p)
 	token->separator = type == T_SEPARATOR || type == T_PIPE;
 	token->buffer = str_new();
 	token->children = lst_new((t_con)free_token);
-	token->parent = tokens;
-	if (!token->buffer || !token->children || (p && !lst_push(tokens, token)))
+	token->parent = parent;
+	if (!token->buffer || !token->children
+		|| (p && !lst_push(parent->children, token)))
 	{
 		free_token(token);
 		return (NULL);
@@ -71,44 +72,44 @@ int	tokenize(t_token *parent, char **line)
 		if (c == '\\' && !escaped)
 		{
 			if (!(cur->quoted))
-				cur = new_token(parent->children, T_WORD, cur, TRUE);
+				cur = new_token(parent, T_WORD, cur, TRUE);
 			escaped = 1;
 			continue ;
 		}
 		else if (cur->type != T_SINGLE_QUOTE && c == '$' && !escaped)
 		{
-			cur = new_token(parent->children, T_VAR, cur, TRUE);
+			cur = new_token(parent, T_VAR, cur, TRUE);
 			continue ;
 		}
 		if (!parent->quoted && !escaped)
 		{
 			if (c == '|')
-				cur = new_token(parent->children, T_PIPE, cur, TRUE);
+				cur = new_token(parent, T_PIPE, cur, TRUE);
 			else if (c == '\"')
 			{
-				cur = new_token(parent->children, T_DOUBLE_QUOTE, cur, TRUE);
+				cur = new_token(parent, T_DOUBLE_QUOTE, cur, TRUE);
 				if (!tokenize(cur, line))
 					return (FALSE);
 				continue ;
 			}
 			else if (c == '\'')
 			{
-				cur = new_token(parent->children, T_SINGLE_QUOTE, cur, TRUE);
+				cur = new_token(parent, T_SINGLE_QUOTE, cur, TRUE);
 				if (!tokenize(cur, line))
 					return (FALSE);
 				continue ;
 			}
 			else if (c == ' ' || c == '\t')
-				cur = new_token(parent->children, T_WHITESPACE, cur, TRUE);
+				cur = new_token(parent, T_WHITESPACE, cur, TRUE);
 			else if (c == '<')
-				cur = new_token(parent->children, T_REDIRECT_IN, cur, TRUE);
+				cur = new_token(parent, T_REDIRECT_IN, cur, TRUE);
 			else if (c == '>')
-				cur = new_token(parent->children, T_REDIRECT_OUT, cur, TRUE);
+				cur = new_token(parent, T_REDIRECT_OUT, cur, TRUE);
 			else if (c == ';')
-				cur = new_token(parent->children, T_SEPARATOR, cur, TRUE);
+				cur = new_token(parent, T_SEPARATOR, cur, TRUE);
 			else if (cur->type != T_VAR
 				|| !is_valid_variable_char(c, *cur->buffer))
-				cur = new_token(parent->children, T_WORD, cur, TRUE);
+				cur = new_token(parent, T_WORD, cur, TRUE);
 		}
 		else if ((c == '\"' && !escaped && parent->type == T_DOUBLE_QUOTE))
 			return (TRUE);
@@ -116,7 +117,7 @@ int	tokenize(t_token *parent, char **line)
 			return (TRUE);
 		else if (cur->type != T_VAR
 			|| !is_valid_variable_char(c, *cur->buffer))
-			cur = new_token(parent->children, T_WORD, cur, TRUE);
+			cur = new_token(parent, T_WORD, cur, TRUE);
 		str_cappend(cur->buffer, c);
 		escaped = parent->type == T_SINGLE_QUOTE;
 	}

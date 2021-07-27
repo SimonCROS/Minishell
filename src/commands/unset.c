@@ -20,7 +20,6 @@ void	do_unset(char **argv)
 {
 	int		i;
 
-	g_global.cmd_ret = 0;
 	i = -1;
 	while (argv[++i])
 	{

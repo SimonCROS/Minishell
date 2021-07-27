@@ -62,11 +62,11 @@ struct s_token
 	int				quoted;
 	int				separator;
 	t_list			*children;
-	t_list			*parent;
+	t_token			*parent;
 };
 
 int			is_valid_variable_char(char c, char *str);
-t_token		*new_token(t_list *tokens, t_token_type type, t_token *t, int push);
+t_token		*new_token(t_token *parent, t_token_type type, t_token *t, int push);
 
 /*** Parsing ******************************************************************/
 
@@ -91,9 +91,6 @@ struct s_global
 	int				fd[2];
 };
 
-// to rm
-void	printcommand(t_command *command);
-
 /*** Commands *****************************************************************/
 
 struct s_redirect
@@ -105,6 +102,13 @@ struct s_redirect
 
 struct s_command
 {
+	char			**buffer;
+	t_token_type	type;
+	int				quoted;
+	int				separator;
+	t_list			*children;
+	t_token			*parent;
+
 	t_list			*args;
 	t_list			*tokens;
 	t_list			*redirect_in;

@@ -47,24 +47,22 @@ $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME):	compile_lib $(OBJS)
-			@ $(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME) -ltermcap
+			$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME) -ltermcap
 
 compile_lib:
-			@ $(MAKE) -C $(LIBFT_DIR)
+			$(MAKE) -C $(LIBFT_DIR)
 
 re_lib:
-			@ $(MAKE) -C $(LIBFT_DIR) re
+			$(MAKE) -C $(LIBFT_DIR) re
 
 clean:
-			@ $(MAKE) -C $(LIBFT_DIR) clean
-			@ echo "Cleaning Minishell binaries\n"
-			@ $(RM) $(OBJS)
+			$(MAKE) -C $(LIBFT_DIR) clean
+			$(RM) $(OBJS)
 			@ find . -type d -empty -delete
 
 fclean:
-			@ $(MAKE) -C $(LIBFT_DIR) fclean
-			@ echo "Cleaning Minishell\n"
-			@ $(RM) $(OBJS) $(NAME)
+			$(MAKE) -C $(LIBFT_DIR) fclean
+			$(RM) $(OBJS) $(NAME)
 			@ find . -type d -empty -delete
 
 re:			fclean all

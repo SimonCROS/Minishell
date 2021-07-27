@@ -175,7 +175,7 @@ int	launch_built_in(t_iterator *it)
 	char		**argv;
 
 	if (it->current)
-		command = it->current->value;
+		command = it->current->next->value;
 	else if (it->list->first)
 		command = it->list->first->value;
 	if (!command || command->next_relation == T_PIPE)
@@ -218,7 +218,7 @@ void	do_command(t_list *cmds)
 			fork_pipes(&it);
 			exit(127);
 		}
-		while (wait(&status) != pid)
+		while (wait(&status) > 0)
 			;
 		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)
 			;

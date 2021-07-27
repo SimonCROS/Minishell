@@ -15,6 +15,8 @@ void	printtoken(t_token *token, t_token *parent)
 {
 	char	*token_name;
 
+	if (!token || token->type == T_NONE)
+		return ;
 	switch (token->type)
 	{
 		case T_WORD:
@@ -25,7 +27,6 @@ void	printtoken(t_token *token, t_token *parent)
 			break;
 		case T_SEPARATOR:
 			token_name = "separator";
-			break;
 			break;
 		case T_SINGLE_QUOTE:
 			token_name = "sin quotes";
@@ -64,8 +65,8 @@ void	printtoken(t_token *token, t_token *parent)
 void	printcommand(t_command *command)
 {
 	parse(command);
-	if (command->tokens->size)
-		lst_foreachp(command->tokens, (t_bicon)printtoken, NULL);
+	if (command->children->size)
+		lst_foreachp(command->children, (t_bicon)printtoken, NULL);
 	if (command->args->size)
 	{
 		lst_foreach(command->args, (t_con)print);
