@@ -8,10 +8,10 @@ int	launch_command2(t_command *cmd)
 	if (!parse(cmd))
 		exit(2);
 	argv = (char **)as_array(cmd->args);
-	path = get_path_from_env(argv[0]);
 	if (argv && redirect_in(cmd) && redirect_out(cmd))
 	{
 		built_in(argv, TRUE);
+		path = get_path_from_env(argv[0]);	
 		if (!file_exists(path))
 			exit(127);
 		return (do_execute(path, argv));

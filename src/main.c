@@ -21,7 +21,7 @@ int	built_in(char **argv, int forked)
 		else
 			return (FALSE);
 		if (forked)
-			exit(EXIT_SUCCESS);
+			exit(errno);
 		return (TRUE);
 	}
 	return (FALSE);
