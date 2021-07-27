@@ -21,7 +21,7 @@ int	built_in(char **argv, int forked)
 		else
 			return (FALSE);
 		if (forked)
-			exit(errno);
+			exit(g_global.cmd_ret);
 		return (TRUE);
 	}
 	return (FALSE);
