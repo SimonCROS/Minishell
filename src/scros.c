@@ -184,22 +184,32 @@ int	parse(t_command *command)
 {
 	char		*argument;
 	t_token		*current;
-	t_iterator	tokens_iterator;
+	t_token		*next;
+	t_iterator	it;
 	int			space;
 	t_list		*lst;
 	int			append;
+	int			fd;
 
 	space = 0;
 	lst = command->args;
-	tokens_iterator = iterator_new(command->children);
+	it = iterator_new(command->children);
 	argument = NULL;
 	append = FALSE;
-	while (iterator_has_next(&tokens_iterator))
+	fd = 1;
+	next = (t_token *)iterator_next(&it);
+	while (next)
 	{
-		current = (t_token *)iterator_next(&tokens_iterator);
+		current = next;
+		next = (t_token *)iterator_next(&it);
 		if (current->type == T_WHITESPACE)
 		{
 			space = 1;
+			continue ;
+		}
+		if (current->type == T_NUMBER && next && next->type == T_REDIRECT_OUT)
+		{
+			fd = ft_atoi(*current->buffer);
 			continue ;
 		}
 		if ((current->separator || current->type == T_REDIRECT_IN || \
@@ -209,10 +219,10 @@ int	parse(t_command *command)
 			{
 				t_redirect	*redirection = malloc(sizeof(t_redirect));
 				if (redirection)
-					*redirection = (t_redirect){1, argument};
+					*redirection = (t_redirect){fd, argument, append};
 				lst_push(lst, redirection);
-				redirection->append = append;
 				append = FALSE;
+				fd = 1;
 			}
 			else
 				lst_push(lst, argument);
@@ -222,7 +232,7 @@ int	parse(t_command *command)
 		if (current->type == T_REDIRECT_OUT)
 		{
 			lst = command->redirect_out;
-			append = ft_strlen(*(current->buffer)) == 2;
+			append = ft_strlen(*current->buffer) == 2;
 		}
 		else if (current->type == T_REDIRECT_IN)
 			lst = command->redirect_in;
@@ -236,10 +246,10 @@ int	parse(t_command *command)
 		{
 			t_redirect	*redirection = malloc(sizeof(t_redirect));
 			if (redirection)
-				*redirection = (t_redirect){1, argument};
+				*redirection = (t_redirect){fd, argument, append};
 			lst_push(lst, redirection);
-			redirection->append = append;
 			append = FALSE;
+			fd = 1;
 		}
 		else
 			lst_push(lst, argument);
@@ -265,6 +275,7 @@ t_list	*parse_line(char *line)
 		lst_destroy(commands);
 		return (NULL);
 	}
+
 	lst_destroy(tokens);
 	return (commands);
 }

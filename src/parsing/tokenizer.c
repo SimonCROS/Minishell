@@ -101,6 +101,10 @@ int	tokenize(t_token *parent, char **line)
 			}
 			else if (c == ' ' || c == '\t')
 				cur = new_token(parent, T_WHITESPACE, cur, TRUE);
+			else if (ft_isdigit(c)
+				&& (cur->type == T_NUMBER || cur->type == T_WHITESPACE
+					|| cur->type == T_NONE || cur->separator))
+				cur = new_token(parent, T_NUMBER, cur, TRUE);
 			else if (c == '<')
 				cur = new_token(parent, T_REDIRECT_IN, cur, TRUE);
 			else if (c == '>')

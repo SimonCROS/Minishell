@@ -6,8 +6,17 @@ void	print(char *str)
 	printf("|%s| ", str);
 }
 
-void	print_redirect(t_redirect *redirection)
+void	print_redirect_out(t_redirect *redirection)
 {
+	if (redirection->fd != 1)
+		printf("%d", redirection->fd);
+	printf("%s ", redirection->append ? ">>" : ">");
+	print(redirection->str);
+}
+
+void	print_redirect_in(t_redirect *redirection)
+{
+	printf("%s ", redirection->append ? "<<" : "<");
 	print(redirection->str);
 }
 
@@ -46,6 +55,9 @@ void	printtoken(t_token *token, t_token *parent)
 		case T_VAR:
 			token_name = "variable";
 			break;
+		case T_NUMBER:
+			token_name = "number";
+			break;
 		default:
 			token_name = "eoi";
 	}
@@ -72,16 +84,14 @@ void	printcommand(t_command *command)
 		lst_foreach(command->args, (t_con)print);
 		printf("\n");
 	}
-	if (command->redirect_out->size)
-	{
-		printf("> ");
-		lst_foreach(command->redirect_out, (t_con)print_redirect);
-		printf("\n");
-	}
 	if (command->redirect_in->size)
 	{
-		printf("< ");
-		lst_foreach(command->redirect_in, (t_con)print_redirect);
+		lst_foreach(command->redirect_in, (t_con)print_redirect_in);
+		printf("\n");
+	}
+	if (command->redirect_out->size)
+	{
+		lst_foreach(command->redirect_out, (t_con)print_redirect_out);
 		printf("\n");
 	}
 	lst_clear(command->args);

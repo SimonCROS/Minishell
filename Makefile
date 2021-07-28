@@ -41,13 +41,13 @@ INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 
 HEADERS		= includes/minishell.h
 
-all:		$(NAME)
+all:		compile_lib $(NAME)
 
 $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			@ mkdir -p $(dir $@);
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(NAME):	compile_lib $(OBJS)
+$(NAME):	$(OBJS)
 			$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME) -ltermcap
 
 compile_lib:

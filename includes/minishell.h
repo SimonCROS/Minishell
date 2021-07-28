@@ -44,6 +44,7 @@ enum e_token_type
 {
 	T_NONE,
 	T_WORD,
+	T_NUMBER,
 	T_WHITESPACE,
 	T_SEPARATOR,
 	T_SINGLE_QUOTE,
@@ -65,7 +66,7 @@ struct s_token
 };
 
 int			is_valid_variable_char(char c, char *str);
-t_token		*new_token(t_token *parent, t_token_type type, t_token *t, int push);
+t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 
 /*** Parsing ******************************************************************/
 

@@ -16,9 +16,8 @@ static int	redirect_out2(t_entry *walk, int out_fd)
 		return (FALSE);
 	}
 	if (walk->next)
-		close(out_fd);
-	else
 		dup2(out_fd, redirect->fd);
+	close(out_fd);
 	return (TRUE);
 }
 
@@ -61,7 +60,8 @@ int	redirect_in(t_command *cmd)
 			close(in_fd);
 		walk = walk->next;
 	}
-	dup2(in_fd, 0);
+	if (walk->next)
+		dup2(in_fd, 0);
 	close(in_fd);
 	return (TRUE);
 }
