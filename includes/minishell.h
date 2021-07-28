@@ -108,9 +108,7 @@ struct s_command
 	int				separator;
 	t_list			*children;
 	t_token			*parent;
-
 	t_list			*args;
-	t_list			*tokens;
 	t_list			*redirect_in;
 	t_list			*redirect_out;
 	t_token_type	next_relation;

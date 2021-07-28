@@ -182,7 +182,6 @@ int	parse(t_command *command)
 {
 	char		*argument;
 	t_token		*current;
-	t_token		*next;
 	t_iterator	it;
 	int			space;
 	t_list		*lst;
@@ -195,17 +194,16 @@ int	parse(t_command *command)
 	argument = NULL;
 	append = FALSE;
 	fd = 1;
-	next = (t_token *)iterator_next(&it);
-	while (next)
+	while (iterator_has_next(&it))
 	{
-		current = next;
-		next = (t_token *)iterator_next(&it);
+		current = (t_token *)iterator_next(&it);
 		if (current->type == T_WHITESPACE)
 		{
 			space = 1;
 			continue ;
 		}
-		if (current->type == T_NUMBER && next && next->type == T_REDIRECT_OUT)
+		if (current->type == T_NUMBER && ((t_token *)it.current->next->value)
+			&& ((t_token *)it.current->next->value)->type == T_REDIRECT_OUT)
 		{
 			fd = ft_atoi(*current->buffer);
 			continue ;
