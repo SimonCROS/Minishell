@@ -72,8 +72,6 @@ int	is_valid(t_token *token)
 
 char	*translate_var(char *str)
 {
-	char	exit_status[100];
-
 	if (!*str)
 		return ("$");
 	return (map_get(g_global.env, str));

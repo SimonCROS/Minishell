@@ -87,6 +87,7 @@ int	launch_built_in(t_iterator *it)
 	t_command	*command;
 	char		**argv;
 
+	command = NULL;
 	if (it->current)
 		command = it->current->next->value;
 	else if (it->list->first)

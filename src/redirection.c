@@ -1,8 +1,9 @@
 #include "minishell.h"
 
-static int	redirect_out2(t_entry *walk, int out_fd)
+static int	redirect_out2(t_entry *walk)
 {
 	t_redirect	*redirect;
+	int			out_fd;
 
 	redirect = ((t_redirect *)walk->value);
 	if (redirect->append)
@@ -15,7 +16,7 @@ static int	redirect_out2(t_entry *walk, int out_fd)
 		g_global.cmd_ret = errno;
 		return (FALSE);
 	}
-	if (walk->next)
+	if (!walk->next)
 		dup2(out_fd, redirect->fd);
 	close(out_fd);
 	return (TRUE);
@@ -23,7 +24,6 @@ static int	redirect_out2(t_entry *walk, int out_fd)
 
 int	redirect_out(t_command *cmd)
 {
-	int			out_fd;
 	t_entry		*walk;
 
 	if (lst_is_empty(cmd->redirect_out))
@@ -31,11 +31,10 @@ int	redirect_out(t_command *cmd)
 	walk = cmd->redirect_out->first;
 	while (walk)
 	{
-		if (!redirect_out2(walk, out_fd))
+		if (!redirect_out2(walk))
 			return (FALSE);
 		walk = walk->next;
 	}
-	close(out_fd);
 	return (TRUE);
 }
 
@@ -60,7 +59,7 @@ int	redirect_in(t_command *cmd)
 			close(in_fd);
 		walk = walk->next;
 	}
-	if (walk->next)
+	if (!walk)
 		dup2(in_fd, 0);
 	close(in_fd);
 	return (TRUE);

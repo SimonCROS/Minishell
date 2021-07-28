@@ -1,7 +1,10 @@
 #include "minishell.h"
 
-static void	term_load2(t_list *cmds, char *line, char *term_name)
+static void	term_load2(char *term_name)
 {
+	t_list	*cmds;
+	char	*line;
+
 	if (tcgetattr(0, &g_global.term) == ERROR || \
 	tcgetattr(0, &g_global.save) == ERROR)
 	{
@@ -27,8 +30,6 @@ static void	term_load2(t_list *cmds, char *line, char *term_name)
 
 void	term_load(void)
 {
-	t_list	*cmds;
-	char	*line;
 	char	*term_name;
 
 	if (map_contains_key(g_global.env, "TERM"))
@@ -38,7 +39,7 @@ void	term_load(void)
 		ft_puterr("Impossible to determine the terminal\n");
 		exit(1);
 	}
-	term_load2(cmds, line, term_name);
+	term_load2(term_name);
 }
 
 int	initialize(char **envp)

@@ -42,7 +42,6 @@ static char	**map_as_array(void)
 
 int	do_execute(char *path, char **argv)
 {
-	int		i;
 	char	**array;
 
 	g_global.cmd_ret = 0;
