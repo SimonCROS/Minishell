@@ -33,7 +33,7 @@ OBJS		= $(addprefix $(BIN)/, $(SRCS:.c=.o))
 
 NAME		= minishell
 
-CC			= gcc
+CC			= clang
 RM			= rm -f
 
 CFLAGS		= -Wall -Wextra -Werror
@@ -42,6 +42,7 @@ INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 HEADERS		= $(INC)/minishell.h $(LIBFT_DIR)/$(INC)/libft.h
 
 all:		compile_lib $(NAME)
+			@ echo "\033[1;31mChange to gcc ?\033[0m"
 
 $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			@ mkdir -p $(dir $@);

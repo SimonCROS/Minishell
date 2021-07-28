@@ -8,6 +8,7 @@
 # include <string.h>
 # include <signal.h>
 # include <termios.h>
+# include <sys/wait.h>
 # include <sys/stat.h>
 # include <sys/errno.h>
 # include <sys/ioctl.h>

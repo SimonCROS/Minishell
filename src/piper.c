@@ -11,10 +11,11 @@ void	launch_command2(t_command *cmd)
 	if (argv && redirect_in(cmd) && redirect_out(cmd))
 	{
 		built_in(argv, TRUE);
-		path = get_path_from_env(argv[0]);	
-		if (!file_exists(path))
-			exit(127);
+		path = get_path_from_env(argv[0]);
+		if (!path)
+			exit(errno);
 		do_execute(path, argv);
+		ft_puterr3(path, ": ", strerror(errno));
 	}
 	exit(EXIT_FAILURE);
 }

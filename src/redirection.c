@@ -71,7 +71,6 @@ static char	*get_path_from_env2(char *path)
 		return (path);
 	errno = 2;
 	ft_puterr3(path, ": ", strerror(errno));
-	g_global.cmd_ret = errno;
 	return (NULL);
 }
 
@@ -95,7 +94,6 @@ char	*get_path_from_env(char *path)
 	{
 		errno = 127;
 		ft_puterr3(path, ": ", "command not found");
-		g_global.cmd_ret = errno;
 		return (NULL);
 	}
 	return (result);
