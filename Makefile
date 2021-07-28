@@ -39,7 +39,7 @@ RM			= rm -f
 CFLAGS		= -Wall -Wextra -Werror
 INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 
-HEADERS		= includes/minishell.h
+HEADERS		= $(INC)/minishell.h $(LIBFT_DIR)/$(INC)/libft.h
 
 all:		compile_lib $(NAME)
 
