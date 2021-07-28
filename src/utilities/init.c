@@ -1,5 +1,13 @@
 #include "minishell.h"
 
+void	wait_proc(int tmp, int count, pid_t last, int status)
+{
+	while (count--)
+		if (wait(&tmp) == last)
+			status = tmp;
+	exit(WEXITSTATUS(status));
+}
+
 static void	term_load2(t_list *cmds, char *line, char *term_name)
 {
 	if (tcgetattr(0, &g_global.term) == ERROR || \

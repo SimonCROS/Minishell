@@ -11,7 +11,7 @@ void	launch_command2(t_command *cmd)
 	if (argv && redirect_in(cmd) && redirect_out(cmd))
 	{
 		built_in(argv, TRUE);
-		path = get_path_from_env(argv[0]);	
+		path = get_path_from_env(argv[0]);
 		if (!file_exists(path))
 			exit(127);
 		do_execute(path, argv);
@@ -44,19 +44,13 @@ int	spawn_proc(int in, int out, t_command *cmd)
 	return (pid);
 }
 
-int	fork_pipes(t_iterator *it)
+void	fork_pipes(t_iterator *it, int in, int status, int count)
 {
 	t_command	*cmd;
 	pid_t		last;
-	int			count;
-	int			in;
 	int			fd[2];
-	int 		tmp;
-	int 		status;
+	int			tmp;
 
-	count = 0;
-	in = 0;
-	status = 0;
 	while (iterator_has_next(it))
 	{
 		cmd = iterator_next(it);
@@ -76,10 +70,7 @@ int	fork_pipes(t_iterator *it)
 		close(fd[1]);
 		in = fd[0];
 	}
-	while (count--)
-		if (wait(&tmp) == last)
-			status = tmp;
-	exit(WEXITSTATUS(status));
+	wait_proc(tmp, count, last, status);
 }
 
 int	launch_built_in(t_iterator *it)
@@ -115,7 +106,7 @@ void	do_command(t_list *cmds)
 {
 	t_iterator	it;
 	int			status;
-	pid_t 		pid;
+	pid_t		pid;
 
 	it = iterator_new(cmds);
 	while (iterator_has_next(&it))
@@ -126,7 +117,7 @@ void	do_command(t_list *cmds)
 		if (pid == -1)
 			break ;
 		if (!pid)
-			fork_pipes(&it);
+			fork_pipes(&it, 0, 0, 0);
 		pid = waitpid(pid, &status, 0);
 		g_global.cmd_ret = WEXITSTATUS(status);
 		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)

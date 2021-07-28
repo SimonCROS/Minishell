@@ -65,7 +65,7 @@ struct s_token
 };
 
 int			is_valid_variable_char(char c, char *str);
-t_token		*new_token(t_token *parent, t_token_type type, t_token *t, int push);
+t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 
 /*** Parsing ******************************************************************/
 
@@ -147,6 +147,7 @@ char		*get_path_from_env(char *path);
 int			file_exists(char *filename);
 int			redirect_in(t_command *cmd);
 int			redirect_out(t_command *cmd);
+void		wait_proc(int tmp, int count, pid_t last, int status);
 
 void		execve_err(void);
 void		ft_puterr(char *a);
