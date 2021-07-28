@@ -45,13 +45,35 @@ int	spawn_proc(int in, int out, t_command *cmd)
 	return (pid);
 }
 
+int	fork_pipes2(t_command *cmd, int *count, int *in, int *last)
+{
+	int	fd[2];
+
+	if (!cmd)
+		return (FALSE);
+	++*count;
+	if (cmd->next_relation != T_PIPE)
+	{
+		if (*in != 0)
+			dup2(*in, 0);
+		*last = spawn_proc(*in, 1, cmd);
+		if (*last == -1)
+			--*count;
+		return (TRUE);
+	}
+	pipe(fd);
+	if (spawn_proc(*in, fd[1], cmd) == -1)
+		--*count;
+	close(fd[1]);
+	*in = fd[0];
+	return (FALSE);
+}
+
 int	fork_pipes(t_iterator *it)
 {
-	t_command	*cmd;
 	pid_t		last;
 	int			count;
 	int			in;
-	int			fd[2];
 	int			tmp;
 	int			status;
 
@@ -59,24 +81,8 @@ int	fork_pipes(t_iterator *it)
 	in = 0;
 	status = 0;
 	while (iterator_has_next(it))
-	{
-		cmd = iterator_next(it);
-		count++;
-		if (cmd->next_relation != T_PIPE)
-		{
-			if (in != 0)
-				dup2(in, 0);
-			last = spawn_proc(in, 1, cmd);
-			if (last == -1)
-				count--;
+		if (fork_pipes2(iterator_next(it), &count, &in, &last))
 			break ;
-		}
-		pipe(fd);
-		if (spawn_proc(in, fd[1], cmd) == -1)
-			count--;
-		close(fd[1]);
-		in = fd[0];
-	}
 	while (count--)
 		if (wait(&tmp) == last)
 			status = tmp;
@@ -87,6 +93,7 @@ int	launch_built_in(t_iterator *it)
 {
 	t_command	*command;
 	char		**argv;
+	int			ret;
 
 	command = NULL;
 	if (it->current)
@@ -97,20 +104,17 @@ int	launch_built_in(t_iterator *it)
 		return (FALSE);
 	parse(command);
 	argv = (char **)as_array(command->args);
-	if (argv && redirect_in(command) && redirect_out(command)
-		&& built_in(argv, FALSE))
-	{
-		dup2(g_global.fd[0], 0);
-		dup2(g_global.fd[1], 1);
-		free(argv);
-		iterator_next(it);
-		return (TRUE);
-	}
+	ret = TRUE;
+	if (argv && redirect_in(command) && redirect_out(command))
+		ret = built_in(argv, FALSE);
 	dup2(g_global.fd[0], 0);
 	dup2(g_global.fd[1], 1);
-	lst_clear(command->args);
 	free(argv);
-	return (FALSE);
+	if (ret)
+		iterator_next(it);
+	else
+		lst_clear(command->args);
+	return (ret);
 }
 
 void	do_command(t_list *cmds)
