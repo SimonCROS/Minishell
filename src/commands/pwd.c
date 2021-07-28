@@ -4,6 +4,7 @@ void	do_pwd(char **argv)
 {
 	char	*path;
 
+	g_global.cmd_ret = 0;
 	if (argv[0] != NULL)
 	{
 		ft_puterr("pwd: too many arguments");

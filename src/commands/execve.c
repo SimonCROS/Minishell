@@ -45,6 +45,7 @@ int	do_execute(char *path, char **argv)
 	int		i;
 	char	**array;
 
+	g_global.cmd_ret = 0;
 	if (!file_exists(path))
 		return (127);
 	array = map_as_array();

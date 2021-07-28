@@ -5,6 +5,7 @@ void	do_env(char **argv)
 	t_citerator		iter;
 	t_mapentry		*elem;
 
+	g_global.cmd_ret = 0;
 	if (*argv != NULL)
 	{
 		ft_putendl_fd("minishell: env: too many arguments", 2);

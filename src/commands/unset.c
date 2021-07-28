@@ -20,6 +20,7 @@ void	do_unset(char **argv)
 {
 	int		i;
 
+	g_global.cmd_ret = 0;
 	i = -1;
 	while (argv[++i])
 	{
@@ -30,9 +31,6 @@ void	do_unset(char **argv)
 			g_global.cmd_ret = NOT_VALID;
 		}
 		else
-		{
 			map_delete(g_global.env, argv[i]);
-			g_global.cmd_ret = 0;
-		}
 	}
 }
