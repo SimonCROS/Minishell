@@ -52,8 +52,8 @@ int	fork_pipes(t_iterator *it)
 	int			count;
 	int			in;
 	int			fd[2];
-	int 		tmp;
-	int 		status;
+	int			tmp;
+	int			status;
 
 	count = 0;
 	in = 0;
@@ -117,7 +117,7 @@ void	do_command(t_list *cmds)
 {
 	t_iterator	it;
 	int			status;
-	pid_t 		pid;
+	pid_t		pid;
 
 	it = iterator_new(cmds);
 	while (iterator_has_next(&it))

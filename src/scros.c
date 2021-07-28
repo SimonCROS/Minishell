@@ -94,7 +94,7 @@ static void	parse_variable(t_token *token, char **container)
 		return ;
 	}
 	var_tokens = as_listf((void **)ft_split(
-			translate_var(*token->buffer), ' '), free);
+				translate_var(*token->buffer), ' '), free);
 	index = lst_index_of(token->parent->children, NULL, token);
 	it = iterator_new(var_tokens);
 	while (iterator_has_next(&it))
@@ -170,6 +170,7 @@ int	parse(t_command *command)
 {
 	char		*argument;
 	t_token		*current;
+	t_redirect	*redirection;
 	t_iterator	it;
 	int			space;
 	t_list		*lst;
@@ -201,7 +202,7 @@ int	parse(t_command *command)
 		{
 			if (lst == command->redirect_in || lst == command->redirect_out)
 			{
-				t_redirect	*redirection = malloc(sizeof(t_redirect));
+				redirection = malloc(sizeof(t_redirect));
 				if (redirection)
 					*redirection = (t_redirect){fd, argument, append};
 				lst_push(lst, redirection);
@@ -228,7 +229,7 @@ int	parse(t_command *command)
 	{
 		if (lst == command->redirect_in || lst == command->redirect_out)
 		{
-			t_redirect	*redirection = malloc(sizeof(t_redirect));
+			redirection = malloc(sizeof(t_redirect));
 			if (redirection)
 				*redirection = (t_redirect){fd, argument, append};
 			lst_push(lst, redirection);
@@ -259,7 +260,6 @@ t_list	*parse_line(char *line)
 		lst_destroy(commands);
 		return (NULL);
 	}
-
 	lst_destroy(tokens);
 	return (commands);
 }

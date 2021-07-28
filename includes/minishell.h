@@ -161,13 +161,6 @@ void		do_key_backspace(int prompt_size);
 void		do_key_down(void);
 void		do_key_up(t_dlist *history);
 
-// --- DEBUG ---
-
-void		printcommand(t_command *command);
-void		printtoken(t_token *token, t_token *parent);
-void		print_redirect(t_redirect *redirection);
-void		print(char *str);
-
 /*** GNL **********************************************************************/
 
 struct s_gnl_entry

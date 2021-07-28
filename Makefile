@@ -10,7 +10,6 @@ SRCS		=	main.c								\
 				redirection.c						\
 				piper.c								\
 				parsing/tokenizer.c					\
-				parsing/debuger.c					\
 				commands/cd.c						\
 				commands/echo.c						\
 				commands/env.c						\
