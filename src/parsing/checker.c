@@ -43,7 +43,7 @@ static int	is_valid(t_token *token)
 	return (TRUE);
 }
 
-static int	is_redirection(t_list *tokens, t_token *current)
+int	is_redirection(t_list *tokens, t_token *current)
 {
 	if (!current)
 		return (FALSE);
@@ -51,13 +51,38 @@ static int	is_redirection(t_list *tokens, t_token *current)
 		return (TRUE);
 	else if (current->type == T_REDIRECT_OUT)
 		return (TRUE);
-	else if (tokens->first && current->type == T_NUMBER
+	else if (tokens && tokens->first && current->type == T_NUMBER
 		&& ((t_token *)lst_first(tokens))->type == T_REDIRECT_OUT)
 		return (TRUE);
 	return (FALSE);
 }
 
-int	validate(t_list *commands, t_list *tokens, int started)
+static int	run_test(t_command *command, t_list *tokens, t_token *cur,
+	t_token *prev)
+{
+	cur->parent = (t_token *)command;
+	lst_push(command->children, cur);
+	if (cur->type != T_WHITESPACE)
+	{
+		if (!is_valid(cur) || (cur->separator && !prev) || (cur->separator \
+		&& prev->separator) || (cur->separator && prev->type == \
+		T_REDIRECT_IN) || (cur->separator && prev->type == T_REDIRECT_OUT) \
+		|| (is_redirection(tokens, prev) && is_redirection(tokens, cur)))
+		{
+			ft_puterr3("minish: syntax error near `", *(cur->buffer), "'");
+			return (-1);
+		}
+		if (cur->separator)
+		{
+			command->next_relation = cur->type;
+			return (2);
+		}
+		return (1);
+	}
+	return (0);
+}
+
+int	validate(t_list *commands, t_list *tokens, int started, int test_result)
 {
 	t_token		*prev;
 	t_token		*cur;
@@ -69,29 +94,16 @@ int	validate(t_list *commands, t_list *tokens, int started)
 	while (cur || !started)
 	{
 		started = 1;
-		cur->parent = (t_token *)command;
-		lst_push(command->children, cur);
-		if (cur->type != T_WHITESPACE)
-		{
-			if (!is_valid(cur) || (cur->separator && !prev) || (cur->separator \
-			&& prev->separator) || (cur->separator && prev->type == \
-			T_REDIRECT_IN) || (cur->separator && prev->type == T_REDIRECT_OUT) \
-			|| (is_redirection(tokens, prev) && is_redirection(tokens, cur)))
-			{
-				ft_puterr3("minish: syntax error near `", *(cur->buffer), "'");
-				return (FALSE);
-			}
-			if (cur->separator)
-			{
-				command->next_relation = cur->type;
-				command = new_command(commands);
-			}
+		test_result = run_test(command, tokens, cur, prev);
+		if (test_result == -1)
+			return (FALSE);
+		if (test_result == 1)
 			prev = cur;
-		}
+		if (test_result == 2)
+			command = new_command(commands);
 		cur = (t_token *)lst_shift(tokens);
 	}
-	if (prev && (prev->type == T_REDIRECT_IN || prev->type == T_REDIRECT_OUT \
-	|| prev->type == T_PIPE))
+	if (prev && (is_redirection(NULL, prev) || prev->type == T_PIPE))
 	{
 		ft_putendl_fd("minish: syntax error: unexpected end of file", 2);
 		return (FALSE);

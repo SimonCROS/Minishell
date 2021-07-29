@@ -72,8 +72,9 @@ t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 /*** Parsing ******************************************************************/
 
 t_list		*parse_line(char *line);
-int			validate(t_list *commands, t_list *tokens, int started);
+int			validate(t_list *commands, t_list *tokens, int started, int zero);
 void		parse_token(t_token *token, char **container);
+int			is_redirection(t_list *tokens, t_token *current);
 
 /*** Global *******************************************************************/
 

@@ -75,7 +75,7 @@ t_list	*parse_line(char *line)
 		return (NULL);
 	empty = null_token();
 	empty.children = tokens;
-	if (!tokenize(&empty, &line) || !validate(commands, tokens, 0))
+	if (!tokenize(&empty, &line) || !validate(commands, tokens, 0, 0))
 	{
 		lst_destroy(tokens);
 		lst_destroy(commands);
