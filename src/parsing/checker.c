@@ -97,7 +97,7 @@ int	validate(t_list *commands, t_list *tokens, int started, int test_result)
 		test_result = run_test(command, tokens, cur, prev);
 		if (test_result == -1)
 			return (FALSE);
-		if (test_result == 1)
+		if (test_result > 0)
 			prev = cur;
 		if (test_result == 2)
 			command = new_command(commands);
