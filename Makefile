@@ -50,7 +50,7 @@ $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			@ mkdir -p $(dir $@);
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(NAME):	$(OBJS)
+$(NAME):	$(OBJS) libft/libft.a
 			$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME) -ltermcap
 
 compile_lib:
