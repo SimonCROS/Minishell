@@ -1,79 +1,8 @@
 #include "minishell.h"
 
-#include <stdio.h>
-
-void	free_token(t_token *token)
+static void	tokenize_char2(t_token *parent, t_token **cur, char c)
 {
-	if (token)
-	{
-		if (token->buffer)
-			free(*(token->buffer));
-		free(token->buffer);
-		lst_destroy(token->children);
-	}
-	free(token);
-}
-
-t_token	null_token(void)
-{
-	return ((t_token){});
-}
-
-t_token	*new_token(t_token *parent, t_token_type type, t_token *cur, int p)
-{
-	t_token	*token;
-
-	if (cur && cur->type == type && cur->type != T_VAR)
-		return (cur);
-	token = malloc(sizeof(t_token));
-	if (!token)
-		return (NULL);
-	token->type = type;
-	token->quoted = type == T_DOUBLE_QUOTE || type == T_SINGLE_QUOTE;
-	token->separator = type == T_SEPARATOR || type == T_PIPE;
-	token->buffer = str_new();
-	token->children = lst_new((t_con)free_token);
-	token->parent = parent;
-	if (!token->buffer || !token->children
-		|| (p && !lst_push(parent->children, token)))
-	{
-		free_token(token);
-		return (NULL);
-	}
-	return (token);
-}
-
-int	is_valid_variable_char(char c, char *str)
-{
-	if (ft_isdigit(str[0]))
-		return (FALSE);
-	if (str[0] == '?')
-		return (FALSE);
-	if (!str[0])
-		return (ft_isalnum(c) || c == '_' || c == '?');
-	else
-		return (ft_isalnum(c) || c == '_');
-}
-
-static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
-{
-	if (c == '|')
-		*cur = new_token(parent, T_PIPE, *cur, TRUE);
-	else if (c == '\"')
-	{
-		*cur = new_token(parent, T_DOUBLE_QUOTE, *cur, TRUE);
-		if (!tokenize(*cur, line))
-			return (FALSE);
-		return (TRUE);
-	}
-	else if (c == '\'')
-	{
-		*cur = new_token(parent, T_SINGLE_QUOTE, *cur, TRUE);
-		if (!tokenize(*cur, line))
-			return (FALSE);
-		return (TRUE);
-	}
-	else if (c == ' ' || c == '\t')
+	if (c == ' ' || c == '\t')
 		*cur = new_token(parent, T_WHITESPACE, *cur, TRUE);
 	else if (ft_isdigit(c)
 		&& ((*cur)->type == T_NUMBER || (*cur)->type == T_WHITESPACE
@@ -88,10 +17,62 @@ static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
 	else if ((*cur)->type != T_VAR
 		|| !is_valid_variable_char(c, *(*cur)->buffer))
 		*cur = new_token(parent, T_WORD, *cur, TRUE);
+}
+
+static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
+{
+	if (c == '|')
+		*cur = new_token(parent, T_PIPE, *cur, TRUE);
+	else if (c == '\"')
+	{
+		*cur = new_token(parent, T_DOUBLE_QUOTE, *cur, TRUE);
+		if (!tokenize(*cur, line, 0))
+			return (FALSE);
+		return (TRUE);
+	}
+	else if (c == '\'')
+	{
+		*cur = new_token(parent, T_SINGLE_QUOTE, *cur, TRUE);
+		if (!tokenize(*cur, line, 0))
+			return (FALSE);
+		return (TRUE);
+	}
+	else
+		tokenize_char2(parent, cur, c);
 	return (TRUE);
 }
 
-int	tokenize(t_token *parent, char **line)
+static int	tokenize2(t_token *parent, t_parsing_arg args, char c,
+	t_token **cur)
+{
+	if (c == '\\' && !*args.params)
+	{
+		if (!((*cur)->quoted))
+			*cur = new_token(parent, T_WORD, *cur, TRUE);
+		*args.params = 1;
+		return (1);
+	}
+	else if ((*cur)->type != T_SINGLE_QUOTE && c == '$' && !*args.params)
+	{
+		*cur = new_token(parent, T_VAR, *cur, TRUE);
+		return (1);
+	}
+	if (!parent->quoted && !*args.params)
+	{
+		if (!tokenize_char(parent, args.argument, cur, c))
+			return (-1);
+	}
+	else if ((c == '\"' && !*args.params && parent->type == T_DOUBLE_QUOTE))
+		return (2);
+	else if ((c == '\'' && parent->type == T_SINGLE_QUOTE))
+		return (2);
+	else if ((*cur)->type != T_VAR
+		|| !is_valid_variable_char(c, *(*cur)->buffer))
+		*cur = new_token(parent, T_WORD, *cur, TRUE);
+	return (0);
+}
+
+int	tokenize(t_token *parent, char **line, int ret)
 {
 	t_token	*cur;
 	int		escaped;
@@ -105,30 +86,13 @@ int	tokenize(t_token *parent, char **line)
 	{
 		c = **line;
 		++*line;
-		if (c == '\\' && !escaped)
-		{
-			if (!(cur->quoted))
-				cur = new_token(parent, T_WORD, cur, TRUE);
-			escaped = 1;
+		ret = tokenize2(parent, (t_parsing_arg){line, &escaped, NULL}, c, &cur);
+		if (ret == -1)
+			return (FALSE);
+		else if (ret == 1)
 			continue ;
-		}
-		else if (cur->type != T_SINGLE_QUOTE && c == '$' && !escaped)
-		{
-			cur = new_token(parent, T_VAR, cur, TRUE);
-			continue ;
-		}
-		if (!parent->quoted && !escaped)
-		{
-			if (!tokenize_char(parent, line, &cur, c))
-				return (FALSE);
-		}
-		else if ((c == '\"' && !escaped && parent->type == T_DOUBLE_QUOTE))
+		else if (ret == 2)
 			return (TRUE);
-		else if ((c == '\'' && parent->type == T_SINGLE_QUOTE))
-			return (TRUE);
-		else if (cur->type != T_VAR
-			|| !is_valid_variable_char(c, *cur->buffer))
-			cur = new_token(parent, T_WORD, cur, TRUE);
 		str_cappend(cur->buffer, c);
 		escaped = parent->type == T_SINGLE_QUOTE;
 	}

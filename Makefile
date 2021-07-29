@@ -12,6 +12,7 @@ SRCS		=	main.c								\
 				parsing/checker.c					\
 				parsing/tokenizer.c					\
 				parsing/line_parser.c				\
+				parsing/tokenizer_utils.c			\
 				commands/cd.c						\
 				commands/echo.c						\
 				commands/env.c						\

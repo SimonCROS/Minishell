@@ -25,7 +25,7 @@ static void	push_argument(t_list **lst, t_command *command, char **arg,
 }
 
 static void	parse_token(t_command *command, t_token *cur, t_list **lst,
-	t_parsing_argument pack)
+	t_parsing_arg pack)
 {
 	if (cur->type == T_WHITESPACE)
 		pack.params[0] = 1;
@@ -65,10 +65,10 @@ int	parse(t_command *command)
 	while (iterator_has_next(&it))
 	{
 		cur = (t_token *)iterator_next(&it);
-		parse_token(command, cur, &lst, (t_parsing_argument){
+		parse_token(command, cur, &lst, (t_parsing_arg){
 			.argument = &argument,
-			.next = NULL,
 			.params = redirect_params,
+			.next = NULL,
 		});
 	}
 	if (argument)

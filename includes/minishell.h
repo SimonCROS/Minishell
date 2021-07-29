@@ -4,7 +4,6 @@
 # include "libft.h"
 # include <term.h>
 # include <fcntl.h>
-# include <stdio.h>
 # include <string.h>
 # include <signal.h>
 # include <termios.h>
@@ -26,7 +25,7 @@ typedef struct s_command		t_command;
 typedef struct s_token			t_token;
 typedef enum e_token_type		t_token_type;
 
-typedef struct s_parsing_arg	t_parsing_argument;
+typedef struct s_parsing_arg	t_parsing_arg;
 
 t_global						g_global;
 
@@ -76,8 +75,8 @@ t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 struct s_parsing_arg
 {
 	char	**argument;
-	t_token	*next;
 	int		*params;
+	t_token	*next;
 };
 
 t_list		*parse_line(char *line);
@@ -133,7 +132,7 @@ struct s_command
 char		**ft_split_first(char *s, char c);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 int			parse(t_command *command);
-int			tokenize(t_token *parent, char **line);
+int			tokenize(t_token *parent, char **line, int ret);
 int			token1(t_token	**cur, char c, int escaped, t_token *parent);
 int			token2(t_token	**cur, char c, char **line, t_token *parent);
 t_token		null_token(void);
