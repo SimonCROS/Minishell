@@ -91,7 +91,7 @@ struct s_global
 	int				pos;
 	char			*line_cpy;
 	t_dentry		*history;
-	int				fd[2];
+	int				fd[3];
 };
 
 int			fork_pipes(t_iterator *it);

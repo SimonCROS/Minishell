@@ -82,6 +82,8 @@ char	*get_path_from_env(char *path)
 	char	*result;
 	char	*var;
 
+	if (!path)
+		return (NULL);
 	var = map_get(g_global.env, "PATH");
 	if (!var || ft_strindex_of(path, '/') != -1)
 		return (get_path_from_env2(path));
