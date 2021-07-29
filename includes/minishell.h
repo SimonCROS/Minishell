@@ -16,17 +16,19 @@
 
 /*** Types ********************************************************************/
 
-typedef struct s_global		t_global;
+typedef struct s_global			t_global;
 
-typedef struct s_gnl_entry	t_gnl_entry;
+typedef struct s_gnl_entry		t_gnl_entry;
 
-typedef struct s_redirect	t_redirect;
-typedef struct s_command	t_command;
+typedef struct s_redirect		t_redirect;
+typedef struct s_command		t_command;
 
-typedef struct s_token		t_token;
-typedef enum e_token_type	t_token_type;
+typedef struct s_token			t_token;
+typedef enum e_token_type		t_token_type;
 
-t_global					g_global;
+typedef struct s_parsing_arg	t_parsing_argument;
+
+t_global						g_global;
 
 /*** Definitions **************************************************************/
 
@@ -71,9 +73,16 @@ t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 
 /*** Parsing ******************************************************************/
 
+struct s_parsing_arg
+{
+	char	**argument;
+	t_token	*next;
+	int		*params;
+};
+
 t_list		*parse_line(char *line);
 int			validate(t_list *commands, t_list *tokens, int started, int zero);
-void		parse_token(t_token *token, char **container);
+void		read_token(t_token *token, char **container);
 int			is_redirection(t_list *tokens, t_token *current);
 
 /*** Global *******************************************************************/

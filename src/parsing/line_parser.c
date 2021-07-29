@@ -46,12 +46,12 @@ static void	parse_variable(t_token *token, char **container)
 	parse_variable2(var_tokens, token);
 }
 
-void	parse_token(t_token *token, char **container)
+void	read_token(t_token *token, char **container)
 {
 	if (token->quoted)
 	{
 		if (token->children->size)
-			lst_foreachp(token->children, (t_bicon)parse_token, container);
+			lst_foreachp(token->children, (t_bicon)read_token, container);
 		else
 			str_append(container, "");
 	}

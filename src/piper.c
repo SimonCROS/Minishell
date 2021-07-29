@@ -5,7 +5,7 @@ static void	launch_command2(t_command *cmd)
 	char	**argv;
 	char	*path;
 
-	if (!parse(cmd))
+	if (lst_is_empty(cmd->args) && !parse(cmd))
 		exit(2);
 	argv = (char **)as_array(cmd->args);
 	if (argv && redirect_in(cmd) && redirect_out(cmd))
@@ -112,7 +112,5 @@ int	launch_built_in(t_iterator *it)
 	free(argv);
 	if (ret)
 		iterator_next(it);
-	else
-		lst_clear(command->args);
 	return (ret);
 }
