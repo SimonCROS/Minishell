@@ -77,24 +77,12 @@ char	*translate_var(char *str)
 	return (map_get(g_global.env, str));
 }
 
-static void	parse_variable(t_token *token, char **container)
+static void	parse_variable2(t_list *var_tokens, t_token *token)
 {
-	char		exit_status[100];
-	t_list		*var_tokens;
 	t_token		*current;
 	int			index;
 	t_iterator	it;
 
-	if (**token->buffer == '?' || token->parent->quoted)
-	{
-		if (**token->buffer == '?')
-			str_append(container, ft_itoa_to(g_global.cmd_ret, exit_status));
-		else
-			str_append(container, translate_var(*token->buffer));
-		return ;
-	}
-	var_tokens = as_listf((void **)ft_split(
-				translate_var(*token->buffer), ' '), free);
 	index = lst_index_of(token->parent->children, NULL, token);
 	it = iterator_new(var_tokens);
 	while (iterator_has_next(&it))
@@ -106,6 +94,26 @@ static void	parse_variable(t_token *token, char **container)
 			lst_insert(token->parent->children, ++index,
 				new_token(token->parent, T_WHITESPACE, NULL, FALSE));
 	}
+}
+
+static void	parse_variable(t_token *token, char **container)
+{
+	char		exit_status[100];
+	t_list		*var_tokens;
+
+	if (**token->buffer == '?')
+	{
+		if (**token->buffer == '?')
+			str_append(container, ft_itoa_to(g_global.cmd_ret, exit_status));
+		else
+			str_append(container, translate_var(*token->buffer));
+		return ;
+	}
+	var_tokens = as_listf((void **)ft_split(
+				translate_var(*token->buffer), ' '), free);
+	if (!var_tokens)
+		return ;
+	parse_variable2(var_tokens, token);
 }
 
 void	parse_token(t_token *token, char **container)
@@ -125,6 +133,7 @@ void	parse_token(t_token *token, char **container)
 		str_append(container, *token->buffer);
 }
 
+// Make me smaller
 int	validate(t_list *commands, t_list *tokens, int started)
 {
 	t_token		*prev;

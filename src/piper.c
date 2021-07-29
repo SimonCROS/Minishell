@@ -13,7 +13,7 @@ void	launch_command2(t_command *cmd)
 		built_in(argv, TRUE);
 		path = get_path_from_env(argv[0]);
 		if (!path)
-			exit(errno);
+			exit(127);
 		do_execute(path, argv);
 		ft_puterr3(path, ": ", strerror(errno));
 	}

@@ -71,6 +71,7 @@ static char	*get_path_from_env2(char *path)
 		return (path);
 	errno = 2;
 	ft_puterr3(path, ": ", strerror(errno));
+	errno = 127;
 	return (NULL);
 }
 
