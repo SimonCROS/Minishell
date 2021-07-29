@@ -55,6 +55,42 @@ int	is_valid_variable_char(char c, char *str)
 		return (ft_isalnum(c) || c == '_');
 }
 
+static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
+{
+	if (c == '|')
+		*cur = new_token(parent, T_PIPE, *cur, TRUE);
+	else if (c == '\"')
+	{
+		*cur = new_token(parent, T_DOUBLE_QUOTE, *cur, TRUE);
+		if (!tokenize(*cur, line))
+			return (FALSE);
+		return (TRUE);
+	}
+	else if (c == '\'')
+	{
+		*cur = new_token(parent, T_SINGLE_QUOTE, *cur, TRUE);
+		if (!tokenize(*cur, line))
+			return (FALSE);
+		return (TRUE);
+	}
+	else if (c == ' ' || c == '\t')
+		*cur = new_token(parent, T_WHITESPACE, *cur, TRUE);
+	else if (ft_isdigit(c)
+		&& ((*cur)->type == T_NUMBER || (*cur)->type == T_WHITESPACE
+			|| (*cur)->type == T_NONE || (*cur)->separator))
+		*cur = new_token(parent, T_NUMBER, *cur, TRUE);
+	else if (c == '<')
+		*cur = new_token(parent, T_REDIRECT_IN, *cur, TRUE);
+	else if (c == '>')
+		*cur = new_token(parent, T_REDIRECT_OUT, *cur, TRUE);
+	else if (c == ';')
+		*cur = new_token(parent, T_SEPARATOR, *cur, TRUE);
+	else if ((*cur)->type != T_VAR
+		|| !is_valid_variable_char(c, *(*cur)->buffer))
+		*cur = new_token(parent, T_WORD, *cur, TRUE);
+	return (TRUE);
+}
+
 int	tokenize(t_token *parent, char **line)
 {
 	t_token	*cur;
@@ -83,37 +119,8 @@ int	tokenize(t_token *parent, char **line)
 		}
 		if (!parent->quoted && !escaped)
 		{
-			if (c == '|')
-				cur = new_token(parent, T_PIPE, cur, TRUE);
-			else if (c == '\"')
-			{
-				cur = new_token(parent, T_DOUBLE_QUOTE, cur, TRUE);
-				if (!tokenize(cur, line))
-					return (FALSE);
-				continue ;
-			}
-			else if (c == '\'')
-			{
-				cur = new_token(parent, T_SINGLE_QUOTE, cur, TRUE);
-				if (!tokenize(cur, line))
-					return (FALSE);
-				continue ;
-			}
-			else if (c == ' ' || c == '\t')
-				cur = new_token(parent, T_WHITESPACE, cur, TRUE);
-			else if (ft_isdigit(c)
-				&& (cur->type == T_NUMBER || cur->type == T_WHITESPACE
-					|| cur->type == T_NONE || cur->separator))
-				cur = new_token(parent, T_NUMBER, cur, TRUE);
-			else if (c == '<')
-				cur = new_token(parent, T_REDIRECT_IN, cur, TRUE);
-			else if (c == '>')
-				cur = new_token(parent, T_REDIRECT_OUT, cur, TRUE);
-			else if (c == ';')
-				cur = new_token(parent, T_SEPARATOR, cur, TRUE);
-			else if (cur->type != T_VAR
-				|| !is_valid_variable_char(c, *cur->buffer))
-				cur = new_token(parent, T_WORD, cur, TRUE);
+			if (!tokenize_char(parent, line, &cur, c))
+				return (FALSE);
 		}
 		else if ((c == '\"' && !escaped && parent->type == T_DOUBLE_QUOTE))
 			return (TRUE);
