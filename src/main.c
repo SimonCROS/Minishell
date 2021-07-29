@@ -1,5 +1,28 @@
 #include "minishell.h"
 
+void	do_command(t_list *cmds)
+{
+	t_iterator	it;
+	int			status;
+	pid_t		pid;
+
+	it = iterator_new(cmds);
+	while (iterator_has_next(&it))
+	{
+		if (launch_built_in(&it))
+			continue ;
+		pid = fork();
+		if (pid == -1)
+			break ;
+		if (!pid)
+			fork_pipes(&it);
+		pid = waitpid(pid, &status, 0);
+		g_global.cmd_ret = WEXITSTATUS(status);
+		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)
+			;
+	}
+}
+
 int	built_in(char **argv, int forked)
 {
 	if (*argv != NULL)

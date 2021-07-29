@@ -6,10 +6,12 @@ LIBFT_DIR	= libft
 LIBFT		= $(LIBFT_DIR)/libft.a
 
 SRCS		=	main.c								\
-				scros.c								\
 				redirection.c						\
 				piper.c								\
+				parsing/parser.c					\
+				parsing/checker.c					\
 				parsing/tokenizer.c					\
+				parsing/line_parser.c				\
 				commands/cd.c						\
 				commands/echo.c						\
 				commands/env.c						\
@@ -24,6 +26,7 @@ SRCS		=	main.c								\
 				utilities/environ.c					\
 				utilities/init.c					\
 				utilities/put_error.c				\
+				utilities/free_elements.c			\
 				gnl/get_next_line.c					\
 				gnl/get_next_line_utils.c			\
 				signal.c

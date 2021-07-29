@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-void	launch_command2(t_command *cmd)
+static void	launch_command2(t_command *cmd)
 {
 	char	**argv;
 	char	*path;
@@ -20,7 +20,7 @@ void	launch_command2(t_command *cmd)
 	exit(EXIT_FAILURE);
 }
 
-int	spawn_proc(int in, int out, t_command *cmd)
+static int	spawn_proc(int in, int out, t_command *cmd)
 {
 	pid_t	pid;
 
@@ -45,7 +45,7 @@ int	spawn_proc(int in, int out, t_command *cmd)
 	return (pid);
 }
 
-int	fork_pipes2(t_command *cmd, int *count, int *in, int *last)
+static int	fork_pipes2(t_command *cmd, int *count, int *in, int *last)
 {
 	int	fd[2];
 
@@ -115,27 +115,4 @@ int	launch_built_in(t_iterator *it)
 	else
 		lst_clear(command->args);
 	return (ret);
-}
-
-void	do_command(t_list *cmds)
-{
-	t_iterator	it;
-	int			status;
-	pid_t		pid;
-
-	it = iterator_new(cmds);
-	while (iterator_has_next(&it))
-	{
-		if (launch_built_in(&it))
-			continue ;
-		pid = fork();
-		if (pid == -1)
-			break ;
-		if (!pid)
-			fork_pipes(&it);
-		pid = waitpid(pid, &status, 0);
-		g_global.cmd_ret = WEXITSTATUS(status);
-		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)
-			;
-	}
 }

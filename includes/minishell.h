@@ -72,6 +72,8 @@ t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 /*** Parsing ******************************************************************/
 
 t_list		*parse_line(char *line);
+int			validate(t_list *commands, t_list *tokens, int started);
+void		parse_token(t_token *token, char **container);
 
 /*** Global *******************************************************************/
 
@@ -91,6 +93,9 @@ struct s_global
 	t_dentry		*history;
 	int				fd[2];
 };
+
+int			fork_pipes(t_iterator *it);
+int			launch_built_in(t_iterator *it);
 
 /*** Commands *****************************************************************/
 
@@ -174,5 +179,10 @@ struct s_gnl_entry
 char		**ft_gnl_split(char *s, char c);
 int			get_next_line(int fd, char **line);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
+
+/*** Others *******************************************************************/
+
+void		free_command(t_command *command);
+void		free_redirect(t_redirect *redirect);
 
 #endif
