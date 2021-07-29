@@ -4,22 +4,18 @@ void	do_command(t_list *cmds)
 {
 	t_iterator	it;
 	int			status;
-	pid_t		pid;
 
 	it = iterator_new(cmds);
 	while (iterator_has_next(&it))
 	{
 		if (launch_built_in(&it))
 			continue ;
-		pid = fork();
-		if (pid == -1)
-			break ;
-		if (!pid)
-			fork_pipes(&it);
-		pid = waitpid(pid, &status, 0);
-		g_global.cmd_ret = WEXITSTATUS(status);
-		while (((t_command *)iterator_next(&it))->next_relation == T_PIPE)
-			;
+		status = fork_pipes(&it);
+		dup2(g_global.fd[0], 0);
+		dup2(g_global.fd[1], 1);
+		dup2(g_global.fd[2], 2);
+		if (g_global.in_cmd)
+			g_global.cmd_ret = WEXITSTATUS(status);
 	}
 }
 
@@ -61,6 +57,7 @@ int	main(int argc, char *argv[], char *envp[])
 	}
 	g_global.fd[0] = dup(0);
 	g_global.fd[1] = dup(1);
+	g_global.fd[2] = dup(2);
 	(void)argv;
 	prompt_size = initialize(envp);
 	signal(SIGQUIT, signal_handler);

@@ -28,8 +28,6 @@ static int	strisnum(char *str)
 void	do_exit(char **argv)
 {
 	ft_putendl_fd("exit", 2);
-	close(g_global.fd[0]);
-	close(g_global.fd[1]);
 	if (argv == NULL)
 		exit(0);
 	else if (!strisnum(argv[0]))

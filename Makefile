@@ -44,7 +44,6 @@ INCLUDES	= -I$(INC) -I$(LIBFT_DIR)/$(INC)
 HEADERS		= $(INC)/minishell.h $(LIBFT_DIR)/$(INC)/libft.h
 
 all:		compile_lib $(NAME)
-			@ echo "\033[1;31mChange to gcc ?\033[0m"
 
 $(BIN)/%.o:	$(SRC)/%.c $(HEADERS)
 			@ mkdir -p $(dir $@);

@@ -86,7 +86,7 @@ int	fork_pipes(t_iterator *it)
 	while (count--)
 		if (wait(&tmp) == last)
 			status = tmp;
-	exit(WEXITSTATUS(status));
+	return (status);
 }
 
 int	launch_built_in(t_iterator *it)
@@ -109,6 +109,7 @@ int	launch_built_in(t_iterator *it)
 		ret = built_in(argv, FALSE);
 	dup2(g_global.fd[0], 0);
 	dup2(g_global.fd[1], 1);
+	dup2(g_global.fd[2], 2);
 	free(argv);
 	if (ret)
 		iterator_next(it);

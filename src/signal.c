@@ -11,10 +11,10 @@ void	signal_interupt(void)
 	if (!g_global.in_cmd)
 	{
 		ft_putstr(PROMPT);
-		g_global.cmd_ret = 130;
+		g_global.cmd_ret = 1;
 	}
 	else
-		g_global.cmd_ret = 1;
+		g_global.cmd_ret = 130;
 	free(*g_global.line);
 	free(g_global.line);
 	g_global.line_cpy = NULL;
@@ -32,6 +32,7 @@ void	signal_quit(void)
 	{
 		ft_putendl("Quit: 3");
 		g_global.cmd_ret = 131;
+		g_global.in_cmd = 0;
 	}
 }
 
