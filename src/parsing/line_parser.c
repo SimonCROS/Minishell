@@ -44,6 +44,7 @@ static void	parse_variable(t_token *token, char **container)
 	if (!var_tokens)
 		return ;
 	parse_variable2(var_tokens, token);
+	lst_destroy(var_tokens);
 }
 
 void	read_token(t_token *token, char **container)
