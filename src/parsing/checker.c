@@ -4,7 +4,7 @@ static t_command	*new_command(t_list *commands)
 {
 	t_command	*command;
 
-	command = calloc(1, sizeof(t_command));
+	command = ft_calloc(1, sizeof(t_command));
 	if (!command)
 		return (NULL);
 	command->children = lst_new((t_consumer)free_token);
