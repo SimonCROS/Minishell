@@ -27,7 +27,7 @@ static void	term_load2(char *term_name)
 		lst_destroy(cmds);
 		exit((256 + g_global.cmd_ret) % 256);
 	}
-	g_global.term.c_lflag &= ~(ICANON | ECHO);
+	g_global.term.c_lflag &= ~(ICANON | ECHO | ISIG);
 	g_global.term.c_cc[VMIN] = 1;
 	g_global.term.c_cc[VTIME] = 0;
 	if (tcsetattr(0, TCSANOW, &g_global.term) == ERROR)
