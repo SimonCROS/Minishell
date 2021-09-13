@@ -90,7 +90,9 @@ char	*get_path_from_env(char *path)
 	new_path = ft_strjoin("/", path);
 	paths = as_listf((void **)ft_split(var, ':'), free);
 	lst_map_in(paths, (t_map_opts){ft_strjoin, new_path, 1}, free);
-	result = ft_strdup(lst_find_first(paths, (t_pre)file_exists));
+	result = ft_strdup(lst_find_first(paths, (t_pre)executable_exists));
+	if (!result)
+		result = ft_strdup(lst_find_first(paths, (t_pre)file_exists));
 	free(new_path);
 	lst_destroy(paths);
 	if (!result)
