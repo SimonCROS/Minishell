@@ -2,13 +2,15 @@
 
 int	echo_with_n(char *first_arg)
 {
+	int	i;
+
 	if (*first_arg == '-')
 	{
-		++first_arg;
-		while (*first_arg == 'n')
-			++first_arg;
-		if (!*first_arg)
-			return (TRUE);
+		i = 0;
+		while (first_arg[++i])
+			if (first_arg[i] != 'n')
+				return (FALSE);
+		return (i > 1);
 	}
 	return (FALSE);
 }
