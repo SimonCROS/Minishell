@@ -39,7 +39,7 @@ void	do_exit(char **argv)
 		exit(g_global.cmd_ret);
 	else if (argv[0] != NULL && argv[1] != NULL)
 	{
-		ft_putendl_fd("exit: too many arguments", 2);
+		ft_putendl_fd("minishell: exit: too many arguments", 2);
 		g_global.cmd_ret = TOO_MANY_ARGS;
 		return ;
 	}
