@@ -37,6 +37,7 @@ t_global						g_global;
 # define NOT_VALID		1
 # define NOT_SET		-4
 # define CTRL_D			"\4"
+# define CTRL_C			"\3"
 # define PROMPT			"minishell> "
 # define CONTINUE		2
 

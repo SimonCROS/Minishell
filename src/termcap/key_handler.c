@@ -26,5 +26,20 @@ int	key_handler(char *str, int prompt_size, t_dlist *history)
 		return (TRUE);
 	if (ft_str_equals(str, CTRL_D))
 		tputs(bell, 1, (int (*)(int))ft_putchar);
+	if (ft_str_equals(str, CTRL_C))
+	{
+		ft_putchar('\n');
+		ft_putstr(PROMPT);
+		g_global.cmd_ret = 1;
+		free(*g_global.line);
+		free(g_global.line);
+		g_global.line_cpy = NULL;
+		g_global.history = NULL;
+		tputs(save_cursor, 1, (int (*)(int))ft_putchar);
+		g_global.line = str_new();
+		g_global.pos = 0;
+		g_global.in_cmd = 0;
+		tcsetattr(0, TCSANOW, &g_global.term);
+	}
 	return (FALSE);
 }
