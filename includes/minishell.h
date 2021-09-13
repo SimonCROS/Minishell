@@ -159,6 +159,7 @@ void		signal_handler(int sig);
 void		terminal(int prompt_size);
 char		*get_path_from_env(char *path);
 int			file_exists(char *filename);
+int			executable_exists(char *filename);
 int			redirect_in(t_command *cmd);
 int			redirect_out(t_command *cmd);
 void		wait_proc(int tmp, int count, pid_t last, int status);

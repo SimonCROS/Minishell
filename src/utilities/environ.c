@@ -6,6 +6,15 @@ void	free_map(char *key, char *value)
 	free(value);
 }
 
+int	executable_exists(char *filename)
+{
+	struct stat		buffer;
+
+	if (!filename)
+		return (FALSE);
+	return (stat(filename, &buffer) == 0 && buffer.st_mode & S_IXUSR);
+}
+
 int	file_exists(char *filename)
 {
 	struct stat		buffer;
