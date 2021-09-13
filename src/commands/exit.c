@@ -29,7 +29,7 @@ void	do_exit(char **argv)
 {
 	ft_putendl_fd("exit", 2);
 	if (argv == NULL)
-		exit(0);
+		exit(g_global.cmd_ret);
 	else if (!strisnum(argv[0]))
 	{
 		ft_puterr3("minishell: exit: ", argv[0], ": numeric argument required");
