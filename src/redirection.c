@@ -95,7 +95,7 @@ char	*get_path_from_env(char *path)
 		result = ft_strdup(lst_find_first(paths, (t_pre)file_exists));
 	free(new_path);
 	lst_destroy(paths);
-	if (!result)
+	if (!result || !*path)
 	{
 		errno = 127;
 		ft_puterr3(path, ": ", "command not found");
