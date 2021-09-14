@@ -2,7 +2,7 @@
 
 char	*skipspace(char *str)
 {
-	while (*str == 32)
+	while (*str == ' ')
 		str++;
 	return (str);
 }

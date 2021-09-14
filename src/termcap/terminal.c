@@ -45,11 +45,6 @@ void	terminal(int prompt_size)
 	*str = 0;
 	history = dlst_new(free);
 
- 	dlst_unshift(history, "echo \"\\n\"");
-    dlst_unshift(history, "exit ' 1234 '");
-    dlst_unshift(history, "exit 1 | exit 2");
-    dlst_unshift(history, "export ABC=\"   aaa    \"; echo \"$ABC\"");
-
 	tputs(keypad_xmit, 1, (int (*)(int))ft_putchar);
 	while (TRUE)
 	{
