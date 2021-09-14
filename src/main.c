@@ -11,6 +11,19 @@ void	do_command(t_list *cmds)
 		if (launch_built_in(&it))
 			continue ;
 		status = fork_pipes(&it);
+		if (WIFSIGNALED(status))
+		{
+			if (WTERMSIG(status) == 2)
+			{
+				ft_putchar('\n');
+				g_global.cmd_ret = 130;
+			}
+			else if (WTERMSIG(status) == 3)
+			{
+				ft_putendl("Quit: 3");
+				g_global.cmd_ret = 131;
+			}
+		}
 		dup2(g_global.fd[0], 0);
 		dup2(g_global.fd[1], 1);
 		dup2(g_global.fd[2], 2);
@@ -60,9 +73,9 @@ int	main(int argc, char *argv[], char *envp[])
 	g_global.fd[2] = dup(2);
 	(void)argv;
 	prompt_size = initialize(envp);
-	signal(SIGQUIT, signal_handler);
 	signal(SIGWINCH, signal_handler);
 	signal(SIGINT, signal_handler);
+	signal(SIGQUIT, signal_handler);
 	terminal(prompt_size);
 	return (0);
 }

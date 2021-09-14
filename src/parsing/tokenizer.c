@@ -17,7 +17,6 @@ static void	tokenize_char2(t_token *parent, t_token **cur, char c)
 	else if ((*cur)->type != T_VAR || !is_valid_var_char(c, *(*cur)->buffer))
 		*cur = new_token(parent, T_WORD, *cur, TRUE);
 }
-#include <stdio.h>
 
 static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
 {
