@@ -5,7 +5,7 @@ static void	cd_update_env(char	*variable)
 	char	*path;
 
 	if (ft_str_equals(variable, "OLDPWD"))
-		path = getcwd(g_global.oldpwd, MAXPATHLEN);
+		path = map_get(g_global.env, "PWD");
 	else
 		path = getcwd(g_global.pwd, MAXPATHLEN);
 	if (map_contains_key(g_global.env, variable))
