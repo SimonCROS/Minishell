@@ -27,7 +27,8 @@ t_token	*new_token(t_token *parent, t_token_type type, t_token *cur, int p)
 	if (!token)
 		return (NULL);
 	token->type = type;
-	token->quoted = type == T_DOUBLE_QUOTE || type == T_SINGLE_QUOTE;
+	token->is_quote = type == T_DOUBLE_QUOTE || type == T_SINGLE_QUOTE;
+	token->quoted = parent->is_quote || parent->quoted;
 	token->separator = type == T_SEPARATOR || type == T_PIPE;
 	token->buffer = str_new();
 	token->children = lst_new((t_con)free_token);

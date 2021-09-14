@@ -62,6 +62,7 @@ struct s_token
 {
 	char			**buffer;
 	t_token_type	type;
+	int				is_quote;
 	int				quoted;
 	int				separator;
 	t_list			*children;
