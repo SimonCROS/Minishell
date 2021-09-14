@@ -47,7 +47,7 @@ static int	tokenize2(t_token *parent, t_parsing_arg args, char c,
 {
 	if (c == '\\' && !*args.params)
 	{
-		if (!((*cur)->quoted))
+		if (!((*cur)->is_quote))
 			*cur = new_token(parent, T_WORD, *cur, TRUE);
 		*args.params = 1;
 		return (1);
@@ -57,7 +57,7 @@ static int	tokenize2(t_token *parent, t_parsing_arg args, char c,
 		*cur = new_token(parent, T_VAR, *cur, TRUE);
 		return (1);
 	}
-	if (!parent->quoted && !*args.params)
+	if (!parent->is_quote && !*args.params)
 	{
 		if (!tokenize_char(parent, args.argument, cur, c))
 			return (-1);
@@ -96,7 +96,7 @@ int	tokenize(t_token *parent, char **line, int ret)
 		str_cappend(cur->buffer, c);
 		escaped = parent->type == T_SINGLE_QUOTE;
 	}
-	if (escaped || parent->quoted)
+	if (escaped || parent->is_quote)
 		ft_putendl_fd("minish: syntax error: unexpected end of file", 2);
-	return (!parent->quoted);
+	return (!escaped && !parent->is_quote);
 }

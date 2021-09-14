@@ -32,24 +32,22 @@ static void	parse_variable(t_token *token, char **container)
 	t_list		*var_tokens;
 
 	if (**token->buffer == '?')
-	{
-		if (**token->buffer == '?')
-			str_append(container, ft_itoa_to(g_global.cmd_ret, exit_status));
-		else
-			str_append(container, translate_var(*token->buffer));
-		return ;
-	}
-	var_tokens = as_listf((void **)ft_split(
+		str_append(container, ft_itoa_to(g_global.cmd_ret, exit_status));
+	else if (token->quoted)
+		str_append(container, translate_var(*token->buffer));
+	else {
+		var_tokens = as_listf((void **)ft_split(
 				translate_var(*token->buffer), ' '), free);
-	if (!var_tokens)
-		return ;
-	parse_variable2(var_tokens, token);
-	lst_destroy(var_tokens);
+		if (!var_tokens)
+			return ;
+		parse_variable2(var_tokens, token);
+		lst_destroy(var_tokens);
+	}
 }
 
 void	read_token(t_token *token, char **container)
 {
-	if (token->quoted)
+	if (token->is_quote)
 	{
 		if (token->children->size)
 			lst_foreachp(token->children, (t_bicon)read_token, container);
