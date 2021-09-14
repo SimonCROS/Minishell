@@ -69,7 +69,7 @@ struct s_token
 	t_token			*parent;
 };
 
-int			is_valid_variable_char(char c, char *str);
+int			is_valid_var_char(char c, char *str);
 t_token		*new_token(t_token *parent, t_token_type tp, t_token *t, int push);
 
 /*** Parsing ******************************************************************/
@@ -135,9 +135,9 @@ char		**ft_split_first(char *s, char c);
 int			gnl_init(char ***current, char **tmp_line, ssize_t *result);
 int			parse(t_command *command);
 int			tokenize(t_token *parent, char **line, int ret);
-int			token1(t_token	**cur, char c, int escaped, t_token *parent);
-int			token2(t_token	**cur, char c, char **line, t_token *parent);
-t_token		null_token(void);
+int			token1(t_token **cur, char c, int escaped, t_token *parent);
+int			token2(t_token **cur, char c, char **line, t_token *parent);
+t_token		null_token(t_token *parent);
 void		free_token(t_token *token);
 
 /*** Modeles ******************************************************************/

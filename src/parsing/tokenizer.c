@@ -14,10 +14,10 @@ static void	tokenize_char2(t_token *parent, t_token **cur, char c)
 		*cur = new_token(parent, T_REDIRECT_OUT, *cur, TRUE);
 	else if (c == ';')
 		*cur = new_token(parent, T_SEPARATOR, *cur, TRUE);
-	else if ((*cur)->type != T_VAR
-		|| !is_valid_variable_char(c, *(*cur)->buffer))
+	else if ((*cur)->type != T_VAR || !is_valid_var_char(c, *(*cur)->buffer))
 		*cur = new_token(parent, T_WORD, *cur, TRUE);
 }
+#include <stdio.h>
 
 static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
 {
@@ -45,9 +45,10 @@ static int	tokenize_char(t_token *parent, char **line, t_token **cur, char c)
 static int	tokenize2(t_token *parent, t_parsing_arg args, char c,
 	t_token **cur)
 {
-	if (c == '\\' && !*args.params)
+	if (c == '\\' && !*args.params
+		&& (!(*cur)->quoted || ft_strindex_of("\\\"$`", **args.argument) != -1))
 	{
-		if (!((*cur)->is_quote))
+		if (!(*cur)->is_quote)
 			*cur = new_token(parent, T_WORD, *cur, TRUE);
 		*args.params = 1;
 		return (1);
@@ -66,8 +67,7 @@ static int	tokenize2(t_token *parent, t_parsing_arg args, char c,
 		return (2);
 	else if ((c == '\'' && parent->type == T_SINGLE_QUOTE))
 		return (2);
-	else if ((*cur)->type != T_VAR
-		|| !is_valid_variable_char(c, *(*cur)->buffer))
+	else if ((*cur)->type != T_VAR || !is_valid_var_char(c, *(*cur)->buffer))
 		*cur = new_token(parent, T_WORD, *cur, TRUE);
 	return (0);
 }
@@ -79,7 +79,7 @@ int	tokenize(t_token *parent, char **line, int ret)
 	t_token	empty;
 	char	c;
 
-	empty = null_token();
+	empty = null_token(parent);
 	cur = &empty;
 	escaped = parent->type == T_SINGLE_QUOTE;
 	while (**line)

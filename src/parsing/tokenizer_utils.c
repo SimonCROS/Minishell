@@ -12,9 +12,14 @@ void	free_token(t_token *token)
 	free(token);
 }
 
-t_token	null_token(void)
+t_token	null_token(t_token *parent)
 {
-	return ((t_token){});
+	if (!parent)
+		return ((t_token){});
+	return ((t_token){
+		.parent = parent,
+		.quoted = parent->is_quote || parent->quoted
+	});
 }
 
 t_token	*new_token(t_token *parent, t_token_type type, t_token *cur, int p)
@@ -42,7 +47,7 @@ t_token	*new_token(t_token *parent, t_token_type type, t_token *cur, int p)
 	return (token);
 }
 
-int	is_valid_variable_char(char c, char *str)
+int	is_valid_var_char(char c, char *str)
 {
 	if (ft_isdigit(str[0]))
 		return (FALSE);

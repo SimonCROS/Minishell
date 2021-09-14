@@ -72,7 +72,7 @@ t_list	*parse_line(char *line)
 	commands = lst_new((t_con)free_command);
 	if (!commands || !tokens)
 		return (NULL);
-	empty = null_token();
+	empty = null_token(NULL);
 	empty.children = tokens;
 	if (!tokenize(&empty, &line, 0) || !validate(commands, tokens, 0, 0))
 	{
