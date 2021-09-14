@@ -10,9 +10,13 @@ static void	cd_update_env(char	*variable)
 		path = getcwd(g_global.pwd, MAXPATHLEN);
 	if (map_contains_key(g_global.env, variable))
 	{
-		if (path)
+		if (path && str_not_empty(path))
+		{
 			map_replace(g_global.env, variable, \
 			ft_strdup(path));
+		}
+		else if (str_is_empty(path) && ft_str_equals(variable, "OLDPWD"))
+			map_delete(g_global.env, variable);
 		else
 			map_replace(g_global.env, variable, \
 			ft_strdup(g_global.pwd));
