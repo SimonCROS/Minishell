@@ -35,9 +35,10 @@ static void	parse_variable(t_token *token, char **container)
 		str_append(container, ft_itoa_to(g_global.cmd_ret, exit_status));
 	else if (token->quoted)
 		str_append(container, translate_var(*token->buffer));
-	else {
+	else
+	{
 		var_tokens = as_listf((void **)ft_split(
-				translate_var(*token->buffer), ' '), free);
+					translate_var(*token->buffer), ' '), free);
 		if (!var_tokens)
 			return ;
 		parse_variable2(var_tokens, token);

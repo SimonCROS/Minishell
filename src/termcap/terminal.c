@@ -44,7 +44,6 @@ void	terminal(int prompt_size)
 
 	*str = 0;
 	history = dlst_new(free);
-
 	tputs(keypad_xmit, 1, (int (*)(int))ft_putchar);
 	while (TRUE)
 	{
