@@ -28,7 +28,6 @@ void	launch_command(t_dlist *history)
 		else
 		{
 			g_global.in_cmd = 1;
-			
 			do_command(cmds);
 			lst_destroy(cmds);
 		}
