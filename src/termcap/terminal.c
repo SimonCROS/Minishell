@@ -58,7 +58,7 @@ void	terminal(int prompt_size)
 		if (ft_str_equals(str, CTRL_D))
 		{
 			if (str_is_empty(*g_global.line) && g_global.pos == 0)
-				do_exit(NULL);
+				do_exit(NULL, FALSE);
 			continue ;
 		}
 		launch_command(history);

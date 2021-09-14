@@ -46,7 +46,7 @@ int	built_in(char **argv, int forked)
 		else if (ft_str_equals(*argv, "env"))
 			do_env(argv + 1);
 		else if (ft_str_equals(*argv, "exit"))
-			do_exit(argv + 1);
+			do_exit(argv + 1, forked);
 		else
 			return (FALSE);
 		if (forked)

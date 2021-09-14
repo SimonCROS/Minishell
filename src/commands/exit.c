@@ -26,9 +26,10 @@ static int	strisnum(char *str)
 	return (!*str);
 }
 
-void	do_exit(char **argv)
+void	do_exit(char **argv, int forked)
 {
-	ft_putendl_fd("exit", 2);
+	if (!forked)
+		ft_putendl_fd("exit", 2);
 	if (argv == NULL || argv[0] == NULL)
 	{
 		tcsetattr(0, TCSANOW, &g_global.save);

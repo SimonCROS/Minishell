@@ -149,7 +149,7 @@ void		do_echo(char **argv);
 void		do_export(char **argv);
 void		do_unset(char **argv);
 void		do_env(char **argv);
-void		do_exit(char **argv);
+void		do_exit(char **argv, int forked);
 long		ft_atol(char *str);
 char		*skipspace(char *str);
 char		*env_compose(char *key, char *value);
