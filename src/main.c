@@ -11,24 +11,21 @@ void	do_command(t_list *cmds)
 		if (launch_built_in(&it))
 			continue ;
 		status = fork_pipes(&it);
-		if (WIFSIGNALED(status))
+		if (WIFSIGNALED(status) && WTERMSIG(status) == 2)
 		{
-			if (WTERMSIG(status) == 2)
-			{
-				ft_putchar('\n');
-				g_global.cmd_ret = 130;
-			}
-			else if (WTERMSIG(status) == 3)
-			{
-				ft_putendl("Quit: 3");
-				g_global.cmd_ret = 131;
-			}
+			ft_putchar('\n');
+			g_global.cmd_ret = 130;
 		}
+		else if (WIFSIGNALED(status) && WTERMSIG(status) == 3)
+		{
+			ft_putendl("Quit: 3");
+			g_global.cmd_ret = 131;
+		}
+		else if (g_global.in_cmd)
+			g_global.cmd_ret = WEXITSTATUS(status);
 		dup2(g_global.fd[0], 0);
 		dup2(g_global.fd[1], 1);
 		dup2(g_global.fd[2], 2);
-		if (g_global.in_cmd)
-			g_global.cmd_ret = WEXITSTATUS(status);
 	}
 }
 
