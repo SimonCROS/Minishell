@@ -29,12 +29,7 @@ static int	strisnum(char *str)
 void	do_exit(char **argv)
 {
 	ft_putendl_fd("exit", 2);
-	if (argv == NULL)
-	{
-		tcsetattr(0, TCSANOW, &g_global.save);
-		exit(g_global.cmd_ret);
-	}
-	else if (argv[0] == NULL)
+	if (argv == NULL || argv[0] == NULL)
 	{
 		tcsetattr(0, TCSANOW, &g_global.save);
 		exit(g_global.cmd_ret);
@@ -45,7 +40,7 @@ void	do_exit(char **argv)
 		ft_puterr3("exit: ", argv[0], ": numeric argument required");
 		exit(255);
 	}
-	else if (argv[0] != NULL && argv[1] != NULL)
+	else if (argv[1] != NULL)
 	{
 		ft_putendl_fd("minishell: exit: too many arguments", 2);
 		g_global.cmd_ret = TOO_MANY_ARGS;
