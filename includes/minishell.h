@@ -149,6 +149,8 @@ void		do_export(char **argv);
 void		do_unset(char **argv);
 void		do_env(char **argv);
 void		do_exit(char **argv);
+long		ft_atol(char *str);
+char		*skipspace(char *str);
 char		*env_compose(char *key, char *value);
 void		load_environment(char **envp);
 int			built_in(char **argv, int forked);

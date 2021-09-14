@@ -28,6 +28,7 @@ SRCS		=	main.c								\
 				utilities/init.c					\
 				utilities/put_error.c				\
 				utilities/free_elements.c			\
+				utilities/ft_atol.c					\
 				gnl/get_next_line.c					\
 				gnl/get_next_line_utils.c			\
 				signal.c
