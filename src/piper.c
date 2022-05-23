@@ -25,8 +25,6 @@ static int	spawn_proc(int in, int out, t_command *cmd)
 	pid_t	pid;
 
 	pid = fork();
-	if (pid == -1)
-		return (pid);
 	if (pid == 0)
 	{
 		if (in != 0)
