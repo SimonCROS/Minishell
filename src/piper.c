@@ -51,8 +51,6 @@ static int	fork_pipes2(t_command *cmd, int *in)
 		return (FALSE);
 	if (cmd->next_relation != T_PIPE)
 	{
-		if (*in != 0)
-			dup2(*in, 0);
 		spawn_proc(*in, 1, cmd);
 		return (TRUE);
 	}
