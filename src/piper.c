@@ -43,26 +43,10 @@ static int	spawn_proc(int in, int out, t_command *cmd)
 	return (pid);
 }
 
-static int	fork_pipes2(t_command *cmd, int *in)
-{
-	int	fd[2];
-
-	if (!cmd)
-		return (FALSE);
-	if (cmd->next_relation != T_PIPE)
-	{
-		spawn_proc(*in, 1, cmd);
-		return (TRUE);
-	}
-	pipe(fd);
-	spawn_proc(*in, fd[1], cmd);
-	close(fd[1]);
-	*in = fd[0];
-	return (FALSE);
-}
-
 int	fork_pipes(t_iterator *it)
 {
+	t_command	*cmd;
+	int			fd[2];
 	int			in;
 	int			tmp;
 	int			status;
@@ -70,8 +54,18 @@ int	fork_pipes(t_iterator *it)
 	in = 0;
 	status = 0;
 	while (iterator_has_next(it))
-		if (fork_pipes2(iterator_next(it), &in))
+	{
+		cmd = iterator_next(it);
+		if (cmd->next_relation != T_PIPE)
+		{
+			spawn_proc(in, 1, cmd);
 			break ;
+		}
+		pipe(fd);
+		spawn_proc(in, fd[1], cmd);
+		close(fd[1]);
+		in = fd[0];
+	}
 	while (wait(&tmp) != -1)
 		status = tmp;
 	return (status);
